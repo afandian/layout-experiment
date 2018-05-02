@@ -1,0 +1,6 @@
+[package]
+name = "layout-experiment"
+version = "0.1.0"
+authors = ["Joe Wass <jwass@crossref.org>"]
+
+[dependencies]

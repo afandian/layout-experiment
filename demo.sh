@@ -1,0 +1,1 @@
+cargo run && convert demo.svg demo.png && convert demo_debug.svg demo_debug.png && open demo.png
