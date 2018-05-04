@@ -1,6 +1,6 @@
 # Layout Experiment
 
-Experimental ideas for a page layout engine, written in Rust. Build page structures and render to SVG. Destined to eventually evolve into something that can used to typeset music for FolkTuneFinder.com.
+Experimental ideas for a page layout engine, written in Rust. Build page structures in a layout tree, render to SVG. Destined to eventually evolve into something that can used to typeset music for FolkTuneFinder.com.
 
 # Demo
 <img src="demo.svg" width="50%">

@@ -10,8 +10,8 @@ pub struct Config {
     pub draw_bounding_box: bool,
 }
 
-#[derive(Clone, Debug)]
-pub struct Point(f32, f32);
+#[derive(Clone, Copy, Debug)]
+pub struct Point(pub f32, pub f32);
 
 #[derive(Clone, Copy, Debug)]
 pub struct Dimensions(pub f32, pub f32);
@@ -23,9 +23,13 @@ impl Dimensions {
             self.1 + margin.total_height(),
         )
     }
+
+    pub fn none() -> Dimensions {
+        Dimensions(0.0, 0.0)
+    }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct Bounds {
     origin: Point,
     dimensions: Dimensions,
@@ -94,25 +98,30 @@ impl TextSpec {
     }
 }
 
-
+#[derive(Debug, Clone, Copy)]
+pub struct LayoutSpec {
+    pub dimensions: Dimensions,
+    pub margin: Margin,
+    pub offset: Point,
+}
 
 #[derive(Debug, Clone)]
 pub enum Node {
-    Blank(Dimensions, Margin),
-    Block(Dimensions, Margin),
-    SolidBlock(Dimensions, Margin),
-    PlaceholderFrame(Dimensions, Margin),
+    Blank(LayoutSpec),
+    Block(LayoutSpec),
+    SolidBlock(LayoutSpec),
+    PlaceholderFrame(LayoutSpec),
     /// Left-to-right layout.
     /// Takes dimensions from children.
-    LTR(Margin, Vec<Node>),
+    LTR(LayoutSpec, Vec<Node>),
     /// Top-to-bottom layout.
     /// Takes dimensions from children.
-    TTB(Margin, Vec<Node>),
+    TTB(LayoutSpec, Vec<Node>),
     /// Left-to-right layout, justified to supplied width.
-    /// Height is derived from content.
-    LTRJustify(Margin, f32, Vec<Node>),
+    /// Height is derived from content (value in LayoutSpec is ignored).
+    LTRJustify(LayoutSpec, Vec<Node>),
     /// Text of given font size.
-    Text(Margin, TextSpec, String),
+    Text(LayoutSpec, TextSpec, String),
 }
 
 /// A node in the tree.
@@ -120,14 +129,15 @@ pub enum Node {
 /// would require a messy proliferation of boxed trait objects.
 impl Node {
     // Get intrinsic dimensions of this Node (i.e. exclusing margin).
+    // These are sometimes derived dynamically, so different from layout.dimensions
     fn get_dimensions(&self) -> Dimensions {
         match self {
-            &Node::Blank(dimensions, _)
-            | &Node::PlaceholderFrame(dimensions, _)
-            | &Node::Block(dimensions, _)
-            | &Node::SolidBlock(dimensions, _) => dimensions,
+            &Node::Blank(layout)
+            | &Node::PlaceholderFrame(layout)
+            | &Node::Block(layout)
+            | &Node::SolidBlock(layout) => layout.dimensions,
 
-            &Node::LTR(_, ref items) => {
+            &Node::LTR(ref layout, ref items) => {
                 // In left-to-right, widths add up. Heights take max.
                 let width = items.iter().map(|x| x.get_outer_dimensions().0).sum();
                 let height = items
@@ -138,7 +148,7 @@ impl Node {
                 Dimensions(width, height)
             }
 
-            &Node::TTB(_, ref items) => {
+            &Node::TTB(ref layout, ref items) => {
                 // In top-to-bottom, heights add up. Widths take max.
                 let height = items.iter().map(|x| x.get_outer_dimensions().1).sum();
                 let width = items
@@ -149,14 +159,14 @@ impl Node {
                 Dimensions(width, height)
             }
 
-            &Node::LTRJustify(_, ref width, ref items) => {
+            &Node::LTRJustify(ref layout, ref items) => {
                 // Width is constant. Heights take max.
                 let height = items
                     .iter()
                     .map(|x| x.get_outer_dimensions().1)
                     .fold(0.0, f32::max);
 
-                Dimensions(*width, height)
+                Dimensions(layout.dimensions.0, height)
             }
 
             &Node::Text(_, ref text_spec, ref text) => {
@@ -172,14 +182,14 @@ impl Node {
     /// Get the margin, zero margin if there isn't one.
     fn get_margin(&self) -> Margin {
         match self {
-            &Node::Blank(_, margin)
-            | &Node::Block(_, margin)
-            | &Node::SolidBlock(_, margin)
-            | &Node::PlaceholderFrame(_, margin)
-            | &Node::LTR(margin, _)
-            | &Node::TTB(margin, _)
-            | &Node::LTRJustify(margin, _, _)
-            | &Node::Text(margin, _, _) => margin,
+            &Node::Blank(layout)
+            | &Node::Block(layout)
+            | &Node::SolidBlock(layout)
+            | &Node::PlaceholderFrame(layout)
+            | &Node::LTR(layout, _)
+            | &Node::TTB(layout, _)
+            | &Node::LTRJustify(layout, _)
+            | &Node::Text(layout, _, _) => layout.margin,
         }
     }
 
@@ -188,20 +198,20 @@ impl Node {
         self.get_dimensions().plus_margin(self.get_margin())
     }
 
-    pub fn new_ltr(margin: Margin) -> Node {
-        Node::LTR(margin, vec![])
+    pub fn new_ltr(layout: LayoutSpec) -> Node {
+        Node::LTR(layout, vec![])
     }
 
-    pub fn new_ltr_justify(margin: Margin, width: f32) -> Node {
-        Node::LTRJustify(margin, width, vec![])
+    pub fn new_ltr_justify(layout: LayoutSpec) -> Node {
+        Node::LTRJustify(layout, vec![])
     }
 
-    pub fn new_ttb(margin: Margin) -> Node {
-        Node::TTB(margin, vec![])
+    pub fn new_ttb(layout: LayoutSpec) -> Node {
+        Node::TTB(layout, vec![])
     }
 
-    pub fn new_text(margin: Margin, text_spec: TextSpec, text: String) -> Node {
-        Node::Text(margin, text_spec, text)
+    pub fn new_text(layout: LayoutSpec, text_spec: TextSpec, text: String) -> Node {
+        Node::Text(layout, text_spec, text)
     }
 
     // Push a child.
@@ -211,7 +221,7 @@ impl Node {
         match self {
             &mut Node::LTR(_, ref mut items)
             | &mut Node::TTB(_, ref mut items)
-            | &mut Node::LTRJustify(_, _, ref mut items) => {
+            | &mut Node::LTRJustify(_, ref mut items) => {
                 items.push(child);
             }
 
@@ -228,9 +238,9 @@ impl Node {
         let dimensions = self.get_dimensions();
 
         match self {
-            &Node::Blank(_, _) => (),
+            &Node::Blank(_) => (),
 
-            &Node::Block(_, _) => {
+            &Node::Block(_) => {
                 write!(
                     buf,
                     "<rect x='{}' y='{}' width='{}' height='{}' \
@@ -239,7 +249,7 @@ impl Node {
                 ).unwrap();
             }
 
-            &Node::SolidBlock(_, _) => {
+            &Node::SolidBlock(_) => {
                 write!(
                     buf,
                     "<rect x='{}' y='{}' width='{}' height='{}' \
@@ -248,7 +258,7 @@ impl Node {
                 ).unwrap();
             }
 
-            &Node::PlaceholderFrame(_, _) => {
+            &Node::PlaceholderFrame(_) => {
                 write!(
                     buf,
                     "<rect x='{}' y='{}' width='{}' height='{}' \
@@ -298,7 +308,7 @@ impl Node {
                 }
             }
 
-            &Node::LTRJustify(_, width, ref children) => {
+            &Node::LTRJustify(ref layout, ref children) => {
                 let mut x = origin.0;
                 let mut y = origin.1;
 
@@ -334,8 +344,8 @@ impl Node {
                 // Distribution should be done by dividing up available (possibly negative) whitespace
                 // not by the centre of each object.
 
-                let remaining_width_in_container =
-                    width - (last.get_outer_dimensions().0 + first.get_outer_dimensions().0);
+                let remaining_width_in_container = layout.dimensions.0
+                    - (last.get_outer_dimensions().0 + first.get_outer_dimensions().0);
 
                 let middle_children = &children[1..children.len() - 1];
 
@@ -423,7 +433,11 @@ impl Page {
         Page {
             margin,
             // Start with nothing. An appropriate root note will get swapped in.
-            root: Node::Blank(Dimensions(0.0, 0.0), Margin::none()),
+            root: Node::Blank(LayoutSpec {
+                margin: Margin::none(),
+                dimensions: Dimensions::none(),
+                offset: Point(0.0, 0.0),
+            }),
         }
     }
 
@@ -441,8 +455,14 @@ impl Page {
             dimensions.0, dimensions.1
         ).unwrap();
 
-        self.root
-            .draw(config, buf, Point(self.margin.w + self.root.get_margin().w, self.margin.n + self.root.get_margin().n));
+        self.root.draw(
+            config,
+            buf,
+            Point(
+                self.margin.w + self.root.get_margin().w,
+                self.margin.n + self.root.get_margin().n,
+            ),
+        );
 
         if config.draw_bounding_box {
             write!(
