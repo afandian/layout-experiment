@@ -6,21 +6,11 @@ use std::io::Write;
 mod layout;
 
 fn demo_1() {
-    let small_margin = layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions::none(),
-        offset: layout::Point(0.0, 0.0),
-    };
-    let no_margin = layout::LayoutSpec {
-        margin: layout::Margin::new(0.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions::none(),
-        offset: layout::Point(0.0, 0.0),
-    };
-    let big_margin = layout::LayoutSpec {
-        margin: layout::Margin::new(10.0, 50.0, 10.0, 50.0),
-        dimensions: layout::Dimensions::none(),
-        offset: layout::Point(0.0, 0.0),
-    };
+    let small_margin = layout::LayoutSpec::none().with_margin(20.0, 0.0, 0.0, 0.0);
+
+    let no_margin = layout::LayoutSpec::none();
+
+    let big_margin = layout::LayoutSpec::none().with_margin(10.0, 50.0, 10.0, 50.0);
 
     let big_text = layout::TextSpec::new(30.0, layout::TextAnchor::Middle);
     let normal_text_l = layout::TextSpec::new(20.0, layout::TextAnchor::Start);
@@ -30,43 +20,39 @@ fn demo_1() {
 
     let mut page = layout::Page::new(layout::Margin::new_uniform(20.0));
 
-    let mut ttb = layout::Node::new_ttb(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions::none(),
-        offset: layout::Point(0.0, 0.0),
-    });
+    let mut ttb =
+        layout::Node::new_ttb(layout::LayoutSpec::none().with_margin(20.0, 0.0, 0.0, 0.0));
 
-    let mut ltr_1 = layout::Node::new_ltr_justify(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(1000.0, 0.0),
-        offset: layout::Point(0.0, 0.0),
-    });
+    let mut ltr_1 = layout::Node::new_ltr_justify(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(1000.0, 0.0),
+    );
 
-    ltr_1.append_child(layout::Node::Blank(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(200.0, 0.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
+    ltr_1.append_child(layout::Node::Blank(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(200.0, 0.0),
+    ));
 
     ltr_1.append_child(layout::Node::new_text(
         no_margin,
         big_text,
         "My Cat's Got No Arms".to_string(),
     ));
-    ltr_1.append_child(layout::Node::Blank(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(200.0, 0.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
+    ltr_1.append_child(layout::Node::Blank(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(200.0, 0.0),
+    ));
     ttb.append_child(ltr_1);
 
-    // ttb.append_child(layout::Node::Blank(layout::Dimensions(0.0, 50.0), small_margin));
+    let mut author = layout::Node::new_ltr_justify(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(1000.0, 0.0),
+    );
 
-    let mut author = layout::Node::new_ltr_justify(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(1000.0, 0.0),
-        offset: layout::Point(0.0, 0.0),
-    });
     author.append_child(layout::Node::new_text(
         no_margin,
         normal_text_l,
@@ -81,619 +67,588 @@ fn demo_1() {
 
     let mut ltr_2 = layout::Node::new_ltr(small_margin);
 
-    let mut ltr_2_ttb_1 = layout::Node::new_ttb(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions::none(),
-        offset: layout::Point(0.0, 0.0),
-    });
-    ltr_2_ttb_1.append_child(layout::Node::PlaceholderFrame(layout::LayoutSpec {
-        margin: layout::Margin::new(10.0, 50.0, 10.0, 50.0),
-        dimensions: layout::Dimensions(400.0, 20.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
+    let mut ltr_2_ttb_1 =
+        layout::Node::new_ttb(layout::LayoutSpec::none().with_margin(20.0, 0.0, 0.0, 0.0));
 
-    ltr_2_ttb_1.append_child(layout::Node::PlaceholderFrame(layout::LayoutSpec {
-        margin: layout::Margin::new(10.0, 50.0, 10.0, 50.0),
-        dimensions: layout::Dimensions(400.0, 20.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
-    ltr_2_ttb_1.append_child(layout::Node::PlaceholderFrame(layout::LayoutSpec {
-        margin: layout::Margin::new(10.0, 50.0, 10.0, 50.0),
-        dimensions: layout::Dimensions(400.0, 20.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
+    ltr_2_ttb_1.append_child(layout::Node::PlaceholderFrame(
+        layout::LayoutSpec::none()
+            .with_margin(10.0, 50.0, 10.0, 50.0)
+            .with_dimensions(400.0, 20.0),
+    ));
+
+    ltr_2_ttb_1.append_child(layout::Node::PlaceholderFrame(
+        layout::LayoutSpec::none()
+            .with_margin(10.0, 50.0, 10.0, 50.0)
+            .with_dimensions(400.0, 20.0),
+    ));
+
+    ltr_2_ttb_1.append_child(layout::Node::PlaceholderFrame(
+        layout::LayoutSpec::none()
+            .with_margin(10.0, 50.0, 10.0, 50.0)
+            .with_dimensions(400.0, 20.0),
+    ));
+
     ltr_2.append_child(ltr_2_ttb_1);
 
-    // ltr_2.append_child(layout::Node::Blank(layout::Dimensions(400.0, 100.0), small_margin));
+    let mut ltr_2_ttb_2 =
+        layout::Node::new_ttb(layout::LayoutSpec::none().with_margin(20.0, 0.0, 0.0, 0.0));
 
-    let mut ltr_2_ttb_2 = layout::Node::new_ttb(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions::none(),
-        offset: layout::Point(0.0, 0.0),
-    });
-    ltr_2_ttb_2.append_child(layout::Node::PlaceholderFrame(layout::LayoutSpec {
-        margin: layout::Margin::new(10.0, 50.0, 10.0, 50.0),
-        dimensions: layout::Dimensions(400.0, 40.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
-    ltr_2_ttb_2.append_child(layout::Node::PlaceholderFrame(layout::LayoutSpec {
-        margin: layout::Margin::new(10.0, 50.0, 10.0, 50.0),
-        dimensions: layout::Dimensions(400.0, 40.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
+    ltr_2_ttb_2.append_child(layout::Node::PlaceholderFrame(
+        layout::LayoutSpec::none()
+            .with_margin(10.0, 50.0, 10.0, 50.0)
+            .with_dimensions(400.0, 40.0),
+    ));
+
+    ltr_2_ttb_2.append_child(layout::Node::PlaceholderFrame(
+        layout::LayoutSpec::none()
+            .with_margin(10.0, 50.0, 10.0, 50.0)
+            .with_dimensions(400.0, 40.0),
+    ));
+
     ltr_2.append_child(ltr_2_ttb_2);
     ttb.append_child(ltr_2);
 
-    // ttb.append_child(layout::Node::Blank(layout::Dimensions(00.0, 20.0), small_margin));
-
     let mut lr_blocks = layout::Node::new_ltr(small_margin);
-    let mut left_block = layout::Node::new_ttb(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions::none(),
-        offset: layout::Point(0.0, 0.0),
-    });
+    let mut left_block =
+        layout::Node::new_ttb(layout::LayoutSpec::none().with_margin(20.0, 0.0, 0.0, 0.0));
 
-    let mut stave_1 = layout::Node::new_ltr_justify(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(500.0, 0.0),
-        offset: layout::Point(0.0, 0.0),
-    });
+    let mut stave_1 = layout::Node::new_ltr_justify(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(500.0, 0.0),
+    );
 
-    stave_1.append_child(layout::Node::SolidBlock(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(20.0, 20.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
+    stave_1.append_child(layout::Node::SolidBlock(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(20.0, 20.0),
+    ));
+
     left_block.append_child(stave_1);
 
-    // left_block.append_child(layout::Node::Blank(layout::Dimensions(00.0, 20.0), small_margin));
+    let mut stave_2 = layout::Node::new_ltr_justify(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(500.0, 0.0),
+    );
 
-    let mut stave_2 = layout::Node::new_ltr_justify(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(500.0, 0.0),
-        offset: layout::Point(0.0, 0.0),
-    });
-    stave_2.append_child(layout::Node::SolidBlock(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(20.0, 20.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
-    stave_2.append_child(layout::Node::SolidBlock(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(20.0, 20.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
+    stave_2.append_child(layout::Node::SolidBlock(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(20.0, 20.0),
+    ));
+
+    stave_2.append_child(layout::Node::SolidBlock(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(20.0, 20.0),
+    ));
     left_block.append_child(stave_2);
 
     // left_block.append_child(layout::Node::Blank(layout::Dimensions(00.0, 20.0), small_margin));
 
-    let mut stave_3 = layout::Node::new_ltr_justify(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(500.0, 0.0),
-        offset: layout::Point(0.0, 0.0),
-    });
-    stave_3.append_child(layout::Node::SolidBlock(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(20.0, 20.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
-    stave_3.append_child(layout::Node::Block(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(20.0, 20.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
-    stave_3.append_child(layout::Node::SolidBlock(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(20.0, 20.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
+    let mut stave_3 = layout::Node::new_ltr_justify(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(500.0, 20.0),
+    );
+
+    stave_3.append_child(layout::Node::SolidBlock(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(20.0, 20.0),
+    ));
+
+    stave_3.append_child(layout::Node::Block(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(20.0, 20.0),
+    ));
+    stave_3.append_child(layout::Node::SolidBlock(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(20.0, 20.0),
+    ));
     left_block.append_child(stave_3);
 
-    // left_block.append_child(layout::Node::Blank(layout::Dimensions(00.0, 20.0), small_margin));
+    let mut stave_5 = layout::Node::new_ltr_justify(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(500.0, 0.0),
+    );
 
-    let mut stave_5 = layout::Node::new_ltr_justify(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(500.0, 0.0),
-        offset: layout::Point(0.0, 0.0),
-    });
-    stave_5.append_child(layout::Node::SolidBlock(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(20.0, 20.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
-    stave_5.append_child(layout::Node::Block(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(20.0, 20.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
-    stave_5.append_child(layout::Node::SolidBlock(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(20.0, 20.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
-    stave_5.append_child(layout::Node::Block(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(20.0, 20.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
-    stave_5.append_child(layout::Node::SolidBlock(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(20.0, 20.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
+    stave_5.append_child(layout::Node::SolidBlock(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(20.0, 20.0),
+    ));
+    stave_5.append_child(layout::Node::Block(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(20.0, 20.0),
+    ));
+    stave_5.append_child(layout::Node::SolidBlock(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(20.0, 20.0),
+    ));
+    stave_5.append_child(layout::Node::Block(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(20.0, 20.0),
+    ));
+    stave_5.append_child(layout::Node::SolidBlock(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(20.0, 20.0),
+    ));
     left_block.append_child(stave_5);
 
-    // left_block.append_child(layout::Node::Blank(layout::Dimensions(00.0, 20.0), small_margin));
+    let mut stave_10 = layout::Node::new_ltr_justify(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(500.0, 0.0),
+    );
 
-    let mut stave_10 = layout::Node::new_ltr_justify(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(500.0, 0.0),
-        offset: layout::Point(0.0, 0.0),
-    });
-    stave_10.append_child(layout::Node::SolidBlock(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(20.0, 20.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
-    stave_10.append_child(layout::Node::Block(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(20.0, 20.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
-    stave_10.append_child(layout::Node::SolidBlock(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(20.0, 20.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
-    stave_10.append_child(layout::Node::Block(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(20.0, 20.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
-    stave_10.append_child(layout::Node::SolidBlock(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(20.0, 20.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
-    stave_10.append_child(layout::Node::Block(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(20.0, 20.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
-    stave_10.append_child(layout::Node::SolidBlock(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(20.0, 20.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
-    stave_10.append_child(layout::Node::Block(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(20.0, 20.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
-    stave_10.append_child(layout::Node::SolidBlock(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(20.0, 20.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
-    stave_10.append_child(layout::Node::Block(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(20.0, 20.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
+    stave_10.append_child(layout::Node::Block(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(20.0, 20.0),
+    ));
+    stave_10.append_child(layout::Node::SolidBlock(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(20.0, 20.0),
+    ));
+
+    stave_10.append_child(layout::Node::Block(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(20.0, 20.0),
+    ));
+    stave_10.append_child(layout::Node::SolidBlock(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(20.0, 20.0),
+    ));
+
+    stave_10.append_child(layout::Node::Block(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(20.0, 20.0),
+    ));
+    stave_10.append_child(layout::Node::SolidBlock(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(20.0, 20.0),
+    ));
+
+    stave_10.append_child(layout::Node::Block(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(20.0, 20.0),
+    ));
+    stave_10.append_child(layout::Node::SolidBlock(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(20.0, 20.0),
+    ));
+    stave_10.append_child(layout::Node::Block(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(20.0, 20.0),
+    ));
+    stave_10.append_child(layout::Node::SolidBlock(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(20.0, 20.0),
+    ));
+    stave_10.append_child(layout::Node::Block(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(20.0, 20.0),
+    ));
+
     left_block.append_child(stave_10);
 
     // left_block.append_child(layout::Node::Blank(layout::Dimensions(00.0, 20.0), small_margin));
 
     lr_blocks.append_child(left_block);
-    lr_blocks.append_child(layout::Node::Blank(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(20.0, 0.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
-    lr_blocks.append_child(layout::Node::PlaceholderFrame(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(480.0, 180.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
+    lr_blocks.append_child(layout::Node::Blank(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(20.0, 0.0),
+    ));
+    lr_blocks.append_child(layout::Node::PlaceholderFrame(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(480.0, 180.0),
+    ));
     ttb.append_child(lr_blocks);
 
-    let mut stave_100 = layout::Node::new_ltr_justify(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(1000.0, 0.0),
-        offset: layout::Point(0.0, 0.0),
-    });
-    stave_100.append_child(layout::Node::PlaceholderFrame(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(100.0, 20.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
+    let mut stave_100 = layout::Node::new_ltr_justify(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(1000.0, 0.0),
+    );
 
-    stave_100.append_child(layout::Node::PlaceholderFrame(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(20.0, 20.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
+    stave_100.append_child(layout::Node::PlaceholderFrame(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(100.0, 20.0),
+    ));
 
-    stave_100.append_child(layout::Node::PlaceholderFrame(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(100.0, 40.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
-    stave_100.append_child(layout::Node::PlaceholderFrame(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(100.0, 60.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
-    stave_100.append_child(layout::Node::PlaceholderFrame(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(100.0, 80.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
-    stave_100.append_child(layout::Node::PlaceholderFrame(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(100.0, 80.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
-    stave_100.append_child(layout::Node::PlaceholderFrame(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(100.0, 80.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
-    stave_100.append_child(layout::Node::PlaceholderFrame(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(100.0, 80.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
-    stave_100.append_child(layout::Node::PlaceholderFrame(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(100.0, 60.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
-    stave_100.append_child(layout::Node::PlaceholderFrame(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(100.0, 40.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
-    stave_100.append_child(layout::Node::PlaceholderFrame(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(100.0, 20.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
+    stave_100.append_child(layout::Node::PlaceholderFrame(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(20.0, 20.0),
+    ));
+
+    stave_100.append_child(layout::Node::PlaceholderFrame(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(100.0, 40.0),
+    ));
+    stave_100.append_child(layout::Node::PlaceholderFrame(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(100.0, 60.0),
+    ));
+    stave_100.append_child(layout::Node::PlaceholderFrame(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(100.0, 80.0),
+    ));
+    stave_100.append_child(layout::Node::PlaceholderFrame(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(100.0, 80.0),
+    ));
+    stave_100.append_child(layout::Node::PlaceholderFrame(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(100.0, 80.0),
+    ));
+    stave_100.append_child(layout::Node::PlaceholderFrame(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(100.0, 80.0),
+    ));
+    stave_100.append_child(layout::Node::PlaceholderFrame(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(100.0, 60.0),
+    ));
+    stave_100.append_child(layout::Node::PlaceholderFrame(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(100.0, 40.0),
+    ));
+    stave_100.append_child(layout::Node::PlaceholderFrame(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(100.0, 20.0),
+    ));
     ttb.append_child(stave_100);
 
-    // ttb.append_child(layout::Node::Blank(layout::Dimensions(00.0, 20.0), small_margin));
+    let mut stave_10_uneven_1 = layout::Node::new_ltr_justify(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(1000.0, 0.0),
+    );
 
-    let mut stave_10_uneven_1 = layout::Node::new_ltr_justify(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(1000.0, 0.0),
-        offset: layout::Point(0.0, 0.0),
-    });
-    stave_10_uneven_1.append_child(layout::Node::PlaceholderFrame(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(50.0, 20.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
-    stave_10_uneven_1.append_child(layout::Node::PlaceholderFrame(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(20.0, 20.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
-    stave_10_uneven_1.append_child(layout::Node::PlaceholderFrame(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(40.0, 20.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
-    stave_10_uneven_1.append_child(layout::Node::PlaceholderFrame(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(20.0, 20.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
-    stave_10_uneven_1.append_child(layout::Node::PlaceholderFrame(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(30.0, 20.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
-    stave_10_uneven_1.append_child(layout::Node::PlaceholderFrame(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(20.0, 20.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
-    stave_10_uneven_1.append_child(layout::Node::PlaceholderFrame(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(10.0, 20.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
-    stave_10_uneven_1.append_child(layout::Node::PlaceholderFrame(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(20.0, 20.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
-    stave_10_uneven_1.append_child(layout::Node::PlaceholderFrame(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(5.0, 20.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
-    stave_10_uneven_1.append_child(layout::Node::PlaceholderFrame(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(20.0, 20.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
+    stave_10_uneven_1.append_child(layout::Node::PlaceholderFrame(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(50.0, 20.0),
+    ));
+    stave_10_uneven_1.append_child(layout::Node::PlaceholderFrame(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(20.0, 20.0),
+    ));
+    stave_10_uneven_1.append_child(layout::Node::PlaceholderFrame(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(40.0, 20.0),
+    ));
+    stave_10_uneven_1.append_child(layout::Node::PlaceholderFrame(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(20.0, 20.0),
+    ));
+    stave_10_uneven_1.append_child(layout::Node::PlaceholderFrame(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(30.0, 20.0),
+    ));
+    stave_10_uneven_1.append_child(layout::Node::PlaceholderFrame(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(20.0, 20.0),
+    ));
+    stave_10_uneven_1.append_child(layout::Node::PlaceholderFrame(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(10.0, 20.0),
+    ));
+    stave_10_uneven_1.append_child(layout::Node::PlaceholderFrame(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(20.0, 20.0),
+    ));
+    stave_10_uneven_1.append_child(layout::Node::PlaceholderFrame(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(5.0, 20.0),
+    ));
+    stave_10_uneven_1.append_child(layout::Node::PlaceholderFrame(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(20.0, 20.0),
+    ));
     ttb.append_child(stave_10_uneven_1);
 
-    // ttb.append_child(layout::Node::Blank(layout::Dimensions(00.0, 20.0), small_margin));
+    let mut stave_10_uneven_2 = layout::Node::new_ltr_justify(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(1000.0, 0.0),
+    );
 
-    let mut stave_10_uneven_2 = layout::Node::new_ltr_justify(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(1000.0, 0.0),
-        offset: layout::Point(0.0, 0.0),
-    });
-    stave_10_uneven_2.append_child(layout::Node::PlaceholderFrame(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(80.0, 20.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
-    stave_10_uneven_2.append_child(layout::Node::PlaceholderFrame(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(50.0, 20.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
-    stave_10_uneven_2.append_child(layout::Node::PlaceholderFrame(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(70.0, 20.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
-    stave_10_uneven_2.append_child(layout::Node::PlaceholderFrame(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(50.0, 20.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
-    stave_10_uneven_2.append_child(layout::Node::PlaceholderFrame(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(50.0, 20.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
-    stave_10_uneven_2.append_child(layout::Node::PlaceholderFrame(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(50.0, 20.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
-    stave_10_uneven_2.append_child(layout::Node::PlaceholderFrame(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(40.0, 20.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
-    stave_10_uneven_2.append_child(layout::Node::PlaceholderFrame(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(50.0, 20.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
-    stave_10_uneven_2.append_child(layout::Node::PlaceholderFrame(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(35.0, 20.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
-    stave_10_uneven_2.append_child(layout::Node::PlaceholderFrame(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(50.0, 20.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
+    stave_10_uneven_2.append_child(layout::Node::PlaceholderFrame(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(80.0, 20.0),
+    ));
+
+    stave_10_uneven_2.append_child(layout::Node::PlaceholderFrame(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(50.0, 20.0),
+    ));
+    stave_10_uneven_2.append_child(layout::Node::PlaceholderFrame(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(70.0, 20.0),
+    ));
+    stave_10_uneven_2.append_child(layout::Node::PlaceholderFrame(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(50.0, 20.0),
+    ));
+    stave_10_uneven_2.append_child(layout::Node::PlaceholderFrame(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(50.0, 20.0),
+    ));
+    stave_10_uneven_2.append_child(layout::Node::PlaceholderFrame(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(50.0, 20.0),
+    ));
+    stave_10_uneven_2.append_child(layout::Node::PlaceholderFrame(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(40.0, 20.0),
+    ));
+    stave_10_uneven_2.append_child(layout::Node::PlaceholderFrame(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(50.0, 20.0),
+    ));
+    stave_10_uneven_2.append_child(layout::Node::PlaceholderFrame(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(35.0, 20.0),
+    ));
+    stave_10_uneven_2.append_child(layout::Node::PlaceholderFrame(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(50.0, 20.0),
+    ));
     ttb.append_child(stave_10_uneven_2);
 
-    // ttb.append_child(layout::Node::Blank(layout::Dimensions(00.0, 20.0), small_margin));
+    let mut stave_very_uneven = layout::Node::new_ltr_justify(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(1000.0, 0.0),
+    );
 
-    let mut stave_very_uneven = layout::Node::new_ltr_justify(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(1000.0, 0.0),
-        offset: layout::Point(0.0, 0.0),
-    });
-    stave_very_uneven.append_child(layout::Node::PlaceholderFrame(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(50.0, 20.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
-    stave_very_uneven.append_child(layout::Node::PlaceholderFrame(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(80.0, 20.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
-    stave_very_uneven.append_child(layout::Node::PlaceholderFrame(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(20.0, 20.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
-    stave_very_uneven.append_child(layout::Node::PlaceholderFrame(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(500.0, 20.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
-    stave_very_uneven.append_child(layout::Node::PlaceholderFrame(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(250.0, 20.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
+    stave_very_uneven.append_child(layout::Node::PlaceholderFrame(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(50.0, 20.0),
+    ));
+    stave_very_uneven.append_child(layout::Node::PlaceholderFrame(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(80.0, 20.0),
+    ));
+    stave_very_uneven.append_child(layout::Node::PlaceholderFrame(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(20.0, 20.0),
+    ));
+    stave_very_uneven.append_child(layout::Node::PlaceholderFrame(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(500.0, 20.0),
+    ));
+    stave_very_uneven.append_child(layout::Node::PlaceholderFrame(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(250.0, 20.0),
+    ));
     ttb.append_child(stave_very_uneven);
 
-    // ttb.append_child(layout::Node::Blank(layout::Dimensions(00.0, 20.0), small_margin));
+    ttb.append_child(layout::Node::PlaceholderFrame(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(1000.0, 50.0),
+    ));
+    ttb.append_child(layout::Node::Blank(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(0.0, 10.0),
+    ));
+    ttb.append_child(layout::Node::PlaceholderFrame(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(1000.0, 50.0),
+    ));
+    ttb.append_child(layout::Node::Blank(
+        layout::LayoutSpec::none().with_dimensions(0.0, 20.0),
+    ));
+    ttb.append_child(layout::Node::PlaceholderFrame(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(1000.0, 50.0),
+    ));
 
-    ttb.append_child(layout::Node::PlaceholderFrame(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(1000.0, 50.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
-    ttb.append_child(layout::Node::Blank(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(0.0, 10.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
-    ttb.append_child(layout::Node::PlaceholderFrame(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(1000.0, 50.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
-    ttb.append_child(layout::Node::Blank(layout::LayoutSpec {
-        margin: layout::Margin::new(0.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(0.0, 20.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
-    ttb.append_child(layout::Node::PlaceholderFrame(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(1000.0, 50.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
+    let mut compound_stave = layout::Node::new_ltr_justify(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(1000.0, 0.0),
+    );
 
-    // ttb.append_child(layout::Node::Blank(layout::Dimensions(00.0, 80.0), small_margin));
-
-    let mut compound_stave = layout::Node::new_ltr_justify(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(1000.0, 0.0),
-        offset: layout::Point(0.0, 0.0),
-    });
-
-    compound_stave.append_child(layout::Node::SolidBlock(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(1.0, 50.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
+    compound_stave.append_child(layout::Node::SolidBlock(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(1.0, 50.0),
+    ));
 
     let mut compound_stave_sub_1 = layout::Node::new_ltr(small_margin);
-    compound_stave_sub_1.append_child(layout::Node::PlaceholderFrame(layout::LayoutSpec {
-        margin: layout::Margin::new(0.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(20.0, 20.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
-    compound_stave_sub_1.append_child(layout::Node::PlaceholderFrame(layout::LayoutSpec {
-        margin: layout::Margin::new(0.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(20.0, 30.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
-    compound_stave_sub_1.append_child(layout::Node::PlaceholderFrame(layout::LayoutSpec {
-        margin: layout::Margin::new(0.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(20.0, 40.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
-    compound_stave_sub_1.append_child(layout::Node::PlaceholderFrame(layout::LayoutSpec {
-        margin: layout::Margin::new(0.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(20.0, 20.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
+    compound_stave_sub_1.append_child(layout::Node::PlaceholderFrame(
+        layout::LayoutSpec::none().with_dimensions(20.0, 20.0),
+    ));
+    compound_stave_sub_1.append_child(layout::Node::PlaceholderFrame(
+        layout::LayoutSpec::none().with_dimensions(20.0, 30.0),
+    ));
+    compound_stave_sub_1.append_child(layout::Node::PlaceholderFrame(
+        layout::LayoutSpec::none().with_dimensions(20.0, 40.0),
+    ));
+    compound_stave_sub_1.append_child(layout::Node::PlaceholderFrame(
+        layout::LayoutSpec::none().with_dimensions(20.0, 20.0),
+    ));
     compound_stave.append_child(compound_stave_sub_1);
 
-    compound_stave.append_child(layout::Node::SolidBlock(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(1.0, 50.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
+    compound_stave.append_child(layout::Node::SolidBlock(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(1.0, 50.0),
+    ));
 
     let mut compound_stave_sub_2 = layout::Node::new_ltr(small_margin);
-    compound_stave_sub_2.append_child(layout::Node::PlaceholderFrame(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(20.0, 30.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
-    compound_stave_sub_2.append_child(layout::Node::PlaceholderFrame(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(20.0, 40.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
-    compound_stave_sub_2.append_child(layout::Node::PlaceholderFrame(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(20.0, 50.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
-    compound_stave_sub_2.append_child(layout::Node::PlaceholderFrame(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(20.0, 60.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
+    compound_stave_sub_2.append_child(layout::Node::PlaceholderFrame(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(20.0, 30.0),
+    ));
+    compound_stave_sub_2.append_child(layout::Node::PlaceholderFrame(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(20.0, 40.0),
+    ));
+    compound_stave_sub_2.append_child(layout::Node::PlaceholderFrame(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(20.0, 50.0),
+    ));
+    compound_stave_sub_2.append_child(layout::Node::PlaceholderFrame(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(20.0, 60.0),
+    ));
     compound_stave.append_child(compound_stave_sub_2);
 
-    compound_stave.append_child(layout::Node::SolidBlock(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(1.0, 50.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
+    compound_stave.append_child(layout::Node::SolidBlock(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(1.0, 50.0),
+    ));
 
     let mut compound_stave_sub_3 = layout::Node::new_ltr(small_margin);
-    compound_stave_sub_3.append_child(layout::Node::PlaceholderFrame(layout::LayoutSpec {
-        margin: layout::Margin::new(0.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(20.0, 60.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
+    compound_stave_sub_3.append_child(layout::Node::PlaceholderFrame(
+        layout::LayoutSpec::none().with_dimensions(20.0, 60.0),
+    ));
 
-    compound_stave_sub_3.append_child(layout::Node::PlaceholderFrame(layout::LayoutSpec {
-        margin: layout::Margin::new(0.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(20.0, 30.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
+    compound_stave_sub_3.append_child(layout::Node::PlaceholderFrame(
+        layout::LayoutSpec::none().with_dimensions(20.0, 30.0),
+    ));
 
-    compound_stave_sub_3.append_child(layout::Node::PlaceholderFrame(layout::LayoutSpec {
-        margin: layout::Margin::new(0.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(20.0, 20.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
+    compound_stave_sub_3.append_child(layout::Node::PlaceholderFrame(
+        layout::LayoutSpec::none().with_dimensions(20.0, 20.0),
+    ));
 
-    compound_stave_sub_3.append_child(layout::Node::PlaceholderFrame(layout::LayoutSpec {
-        margin: layout::Margin::new(0.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(20.0, 40.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
+    compound_stave_sub_3.append_child(layout::Node::PlaceholderFrame(
+        layout::LayoutSpec::none().with_dimensions(20.0, 40.0),
+    ));
 
     compound_stave.append_child(compound_stave_sub_3);
 
-    compound_stave.append_child(layout::Node::SolidBlock(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(1.0, 50.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
+    compound_stave.append_child(layout::Node::SolidBlock(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(1.0, 50.0),
+    ));
 
     let mut compound_stave_sub_4 = layout::Node::new_ltr(small_margin);
-    compound_stave_sub_4.append_child(layout::Node::PlaceholderFrame(layout::LayoutSpec {
-        margin: layout::Margin::none(),
-        dimensions: layout::Dimensions(20.0, 50.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
-    compound_stave_sub_4.append_child(layout::Node::PlaceholderFrame(layout::LayoutSpec {
-        margin: layout::Margin::none(),
-        dimensions: layout::Dimensions(20.0, 40.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
-    compound_stave_sub_4.append_child(layout::Node::PlaceholderFrame(layout::LayoutSpec {
-        margin: layout::Margin::none(),
-        dimensions: layout::Dimensions(20.0, 30.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
-    compound_stave_sub_4.append_child(layout::Node::PlaceholderFrame(layout::LayoutSpec {
-        margin: layout::Margin::none(),
-        dimensions: layout::Dimensions(40.0, 10.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
+    compound_stave_sub_4.append_child(layout::Node::PlaceholderFrame(
+        layout::LayoutSpec::none().with_dimensions(20.0, 50.0),
+    ));
+    compound_stave_sub_4.append_child(layout::Node::PlaceholderFrame(
+        layout::LayoutSpec::none().with_dimensions(20.0, 40.0),
+    ));
+    compound_stave_sub_4.append_child(layout::Node::PlaceholderFrame(
+        layout::LayoutSpec::none().with_dimensions(20.0, 30.0),
+    ));
+    compound_stave_sub_4.append_child(layout::Node::PlaceholderFrame(
+        layout::LayoutSpec::none().with_dimensions(40.0, 10.0),
+    ));
     compound_stave.append_child(compound_stave_sub_4);
 
-    compound_stave.append_child(layout::Node::SolidBlock(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(1.0, 50.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
+    compound_stave.append_child(layout::Node::SolidBlock(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(1.0, 50.0),
+    ));
 
-    layout::Node::PlaceholderFrame(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(400.0, 20.0),
-        offset: layout::Point(0.0, 0.0),
-    });
-
+    layout::Node::PlaceholderFrame(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(400.0, 20.0),
+    );
     ttb.append_child(compound_stave);
 
-    ttb.append_child(layout::Node::Blank(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(200.0, 0.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
+    ttb.append_child(layout::Node::Blank(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(200.0, 0.0),
+    ));
 
-    let mut words = layout::Node::new_ttb(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 200.0),
-        dimensions: layout::Dimensions::none(),
-        offset: layout::Point(0.0, 0.0),
-    });
+    let mut words =
+        layout::Node::new_ttb(layout::LayoutSpec::none().with_margin(20.0, 0.0, 0.0, 200.0));
+
     words.append_child(layout::Node::new_text(
         no_margin,
         normal_text_l,
@@ -715,11 +670,11 @@ fn demo_1() {
         "I suspect he's never actually done it".to_string(),
     ));
 
-    words.append_child(layout::Node::Blank(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(200.0, 0.0),
-        offset: layout::Point(0.0, 0.0),
-    }));
+    words.append_child(layout::Node::Blank(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(200.0, 0.0),
+    ));
 
     words.append_child(layout::Node::new_text(
         no_margin,
@@ -744,11 +699,11 @@ fn demo_1() {
 
     ttb.append_child(words);
 
-    let mut footnote = layout::Node::new_ltr_justify(layout::LayoutSpec {
-        margin: layout::Margin::new(20.0, 0.0, 0.0, 0.0),
-        dimensions: layout::Dimensions(1000.0, 0.0),
-        offset: layout::Point(0.0, 0.0),
-    });
+    let mut footnote = layout::Node::new_ltr_justify(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 0.0, 0.0, 0.0)
+            .with_dimensions(1000.0, 0.0),
+    );
 
     footnote.append_child(layout::Node::new_text(
         no_margin,

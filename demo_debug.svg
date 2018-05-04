@@ -70,26 +70,28 @@ Trad. Cornish
 <rect x='500' y='550' width='20' height='20' style='fill:#333 solid;stroke:black;stroke-width:1' />
 <rect x='500' y='550' width='20' height='20' class='debug debug-node' style='fill:none;stroke:blue;stroke-width:1'   />
 <rect x='20' y='530' width='500' height='40' class='debug debug-node' style='fill:none;stroke:blue;stroke-width:1'   />
-<rect x='20' y='610' width='20' height='20' style='fill:#333 solid;stroke:black;stroke-width:1' />
+<rect x='20' y='610' width='20' height='20' style='fill:none;stroke:black;stroke-width:1' />
 <rect x='20' y='610' width='20' height='20' class='debug debug-node' style='fill:none;stroke:blue;stroke-width:1'   />
-<rect x='73.33333' y='610' width='20' height='20' style='fill:none;stroke:black;stroke-width:1' />
-<rect x='73.33333' y='610' width='20' height='20' class='debug debug-node' style='fill:none;stroke:blue;stroke-width:1'   />
-<rect x='126.66666' y='610' width='20' height='20' style='fill:#333 solid;stroke:black;stroke-width:1' />
-<rect x='126.66666' y='610' width='20' height='20' class='debug debug-node' style='fill:none;stroke:blue;stroke-width:1'   />
-<rect x='179.99998' y='610' width='20' height='20' style='fill:none;stroke:black;stroke-width:1' />
-<rect x='179.99998' y='610' width='20' height='20' class='debug debug-node' style='fill:none;stroke:blue;stroke-width:1'   />
-<rect x='233.33331' y='610' width='20' height='20' style='fill:#333 solid;stroke:black;stroke-width:1' />
-<rect x='233.33331' y='610' width='20' height='20' class='debug debug-node' style='fill:none;stroke:blue;stroke-width:1'   />
-<rect x='286.66666' y='610' width='20' height='20' style='fill:none;stroke:black;stroke-width:1' />
-<rect x='286.66666' y='610' width='20' height='20' class='debug debug-node' style='fill:none;stroke:blue;stroke-width:1'   />
-<rect x='340' y='610' width='20' height='20' style='fill:#333 solid;stroke:black;stroke-width:1' />
-<rect x='340' y='610' width='20' height='20' class='debug debug-node' style='fill:none;stroke:blue;stroke-width:1'   />
-<rect x='393.33334' y='610' width='20' height='20' style='fill:none;stroke:black;stroke-width:1' />
-<rect x='393.33334' y='610' width='20' height='20' class='debug debug-node' style='fill:none;stroke:blue;stroke-width:1'   />
-<rect x='446.6667' y='610' width='20' height='20' style='fill:#333 solid;stroke:black;stroke-width:1' />
-<rect x='446.6667' y='610' width='20' height='20' class='debug debug-node' style='fill:none;stroke:blue;stroke-width:1'   />
-<rect x='500.00003' y='610' width='20' height='20' style='fill:none;stroke:black;stroke-width:1' />
-<rect x='500.00003' y='610' width='20' height='20' class='debug debug-node' style='fill:none;stroke:blue;stroke-width:1'   />
+<rect x='68' y='610' width='20' height='20' style='fill:#333 solid;stroke:black;stroke-width:1' />
+<rect x='68' y='610' width='20' height='20' class='debug debug-node' style='fill:none;stroke:blue;stroke-width:1'   />
+<rect x='116' y='610' width='20' height='20' style='fill:none;stroke:black;stroke-width:1' />
+<rect x='116' y='610' width='20' height='20' class='debug debug-node' style='fill:none;stroke:blue;stroke-width:1'   />
+<rect x='164' y='610' width='20' height='20' style='fill:#333 solid;stroke:black;stroke-width:1' />
+<rect x='164' y='610' width='20' height='20' class='debug debug-node' style='fill:none;stroke:blue;stroke-width:1'   />
+<rect x='212' y='610' width='20' height='20' style='fill:none;stroke:black;stroke-width:1' />
+<rect x='212' y='610' width='20' height='20' class='debug debug-node' style='fill:none;stroke:blue;stroke-width:1'   />
+<rect x='260' y='610' width='20' height='20' style='fill:#333 solid;stroke:black;stroke-width:1' />
+<rect x='260' y='610' width='20' height='20' class='debug debug-node' style='fill:none;stroke:blue;stroke-width:1'   />
+<rect x='308' y='610' width='20' height='20' style='fill:none;stroke:black;stroke-width:1' />
+<rect x='308' y='610' width='20' height='20' class='debug debug-node' style='fill:none;stroke:blue;stroke-width:1'   />
+<rect x='356' y='610' width='20' height='20' style='fill:#333 solid;stroke:black;stroke-width:1' />
+<rect x='356' y='610' width='20' height='20' class='debug debug-node' style='fill:none;stroke:blue;stroke-width:1'   />
+<rect x='404' y='610' width='20' height='20' style='fill:none;stroke:black;stroke-width:1' />
+<rect x='404' y='610' width='20' height='20' class='debug debug-node' style='fill:none;stroke:blue;stroke-width:1'   />
+<rect x='452' y='610' width='20' height='20' style='fill:#333 solid;stroke:black;stroke-width:1' />
+<rect x='452' y='610' width='20' height='20' class='debug debug-node' style='fill:none;stroke:blue;stroke-width:1'   />
+<rect x='500' y='610' width='20' height='20' style='fill:none;stroke:black;stroke-width:1' />
+<rect x='500' y='610' width='20' height='20' class='debug debug-node' style='fill:none;stroke:blue;stroke-width:1'   />
 <rect x='20' y='590' width='500' height='40' class='debug debug-node' style='fill:none;stroke:blue;stroke-width:1'   />
 <rect x='20' y='330' width='500' height='300' class='debug debug-node' style='fill:none;stroke:blue;stroke-width:1'   />
 <rect x='520' y='330' width='20' height='0' class='debug debug-node' style='fill:none;stroke:blue;stroke-width:1'   />

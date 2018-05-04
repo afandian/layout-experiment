@@ -105,6 +105,37 @@ pub struct LayoutSpec {
     pub offset: Point,
 }
 
+impl LayoutSpec {
+    pub fn none() -> LayoutSpec {
+        LayoutSpec {
+            dimensions: Dimensions::none(),
+            margin: Margin::none(),
+            offset: Point(0.0, 0.0),
+        }
+    }
+
+    pub fn with_dimensions(&self, x: f32, y: f32) -> LayoutSpec {
+        LayoutSpec {
+            dimensions: Dimensions(x, y),
+            ..*self
+        }
+    }
+
+    pub fn with_margin(&self, n: f32, e: f32, s: f32, w: f32) -> LayoutSpec {
+        LayoutSpec {
+            margin: Margin { n, e, s, w },
+            ..*self
+        }
+    }
+
+    pub fn with_offset(&self, x: f32, y: f32) -> LayoutSpec {
+        LayoutSpec {
+            offset: Point(x, y),
+            ..*self
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub enum Node {
     Blank(LayoutSpec),
