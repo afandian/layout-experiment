@@ -13,8 +13,14 @@ Experimental ideas for a page layout engine, written in Rust. Build page structu
 
 # Progress
 
-## 2018-05-02
+## 2018-05-05
+<img src="progress/2018-05-05.svg" width="50%">
 
+
+## 2018-05-04
+<img src="progress/2018-05-04.svg" width="50%">
+
+## 2018-05-02
 <img src="progress/2018-05-02.svg" width="50%">
 
 # TODO
