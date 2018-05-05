@@ -1,5 +1,7 @@
 //! Layout experiment
 //! Prototyping an SVG page layout engine.
+//! Design is somewhat coupled: constructors passing arguments through, static polymorphism.
+//! But this is destined to be part of a special purpose application, not a library.
 use std::fs::File;
 use std::io::Write;
 
@@ -501,16 +503,179 @@ fn demo_1() {
     ));
     ttb.append_child(stave_very_uneven);
 
-    ttb.append_child(layout::Node::PlaceholderFrame(
+    let mut notes_stave_layout = layout::Node::new_ltr_justify(
         layout::LayoutSpec::none()
-            .with_margin(20.0, 0.0, 0.0, 0.0)
-            .with_dimensions(1000.0, 50.0),
+            .with_margin(20.0, 00.0, 20.0, 00.0)
+            .with_dimensions(1000.0, 0.0),
+    );
+
+    let notehead_layout = layout::LayoutSpec::none()
+        .with_dimensions(20.0, 10.0)
+        .with_margin(0.0, 10.0, 0.0, 10.0);
+
+    let barline_layout = layout::LayoutSpec::none().with_dimensions(1.0, 40.0);
+
+    notes_stave_layout.append_child(layout::Node::SolidBlock(
+        barline_layout.with_offset(0.0, -20.0),
     ));
-    ttb.append_child(layout::Node::Blank(
-        layout::LayoutSpec::none()
-            .with_margin(20.0, 0.0, 0.0, 0.0)
-            .with_dimensions(0.0, 10.0),
+
+    notes_stave_layout.append_child(layout::Node::new_solid_block(
+        notehead_layout.with_offset(0.0, -5.0),
     ));
+
+    notes_stave_layout.append_child(layout::Node::new_solid_block(
+        notehead_layout.with_offset(0.0, 15.0),
+    ));
+
+    notes_stave_layout.append_child(layout::Node::new_block(
+        notehead_layout
+            .with_offset(0.0, 15.0)
+            .with_margin(0.0, 20.0, 0.0, 10.0),
+    ));
+
+    notes_stave_layout.append_child(layout::Node::SolidBlock(
+        barline_layout.with_offset(0.0, -20.0),
+    ));
+
+    notes_stave_layout.append_child(layout::Node::new_solid_block(
+        notehead_layout.with_offset(0.0, -5.0),
+    ));
+
+    notes_stave_layout.append_child(layout::Node::new_solid_block(
+        notehead_layout.with_offset(0.0, 15.0),
+    ));
+
+    notes_stave_layout.append_child(layout::Node::new_solid_block(
+        notehead_layout
+            .with_offset(0.0, 15.0)
+            .with_margin(0.0, 20.0, 0.0, 10.0),
+    ));
+
+    notes_stave_layout.append_child(layout::Node::new_solid_block(
+        notehead_layout
+            .with_offset(0.0, 10.0)
+            .with_margin(0.0, 20.0, 0.0, 15.0),
+    ));
+
+    notes_stave_layout.append_child(layout::Node::SolidBlock(
+        barline_layout.with_offset(0.0, -20.0),
+    ));
+
+    notes_stave_layout.append_child(layout::Node::new_solid_block(
+        notehead_layout.with_offset(0.0, 5.0),
+    ));
+
+    notes_stave_layout.append_child(layout::Node::new_solid_block(
+        notehead_layout.with_offset(0.0, 5.0),
+    ));
+
+    notes_stave_layout.append_child(layout::Node::new_solid_block(
+        notehead_layout.with_offset(0.0, 10.0),
+    ));
+
+    notes_stave_layout.append_child(layout::Node::new_solid_block(
+        notehead_layout.with_offset(0.0, 5.0),
+    ));
+
+    notes_stave_layout.append_child(layout::Node::SolidBlock(
+        barline_layout.with_offset(0.0, -20.0),
+    ));
+
+    notes_stave_layout.append_child(layout::Node::new_block(
+        notehead_layout
+            .with_offset(0.0, 0.0)
+            .with_margin(0.0, 40.0, 0.0, 40.0),
+    ));
+
+    notes_stave_layout.append_child(layout::Node::new_block(
+        barline_layout.with_offset(0.0, -20.0),
+    ));
+
+    notes_stave_layout.append_child(layout::Node::new_solid_block(
+        notehead_layout.with_offset(0.0, -5.0),
+    ));
+
+    notes_stave_layout.append_child(layout::Node::new_solid_block(
+        notehead_layout.with_offset(0.0, 15.0),
+    ));
+
+    notes_stave_layout.append_child(layout::Node::new_block(
+        notehead_layout
+            .with_offset(0.0, 15.0)
+            .with_margin(0.0, 20.0, 0.0, 10.0),
+    ));
+
+    notes_stave_layout.append_child(layout::Node::SolidBlock(
+        barline_layout.with_offset(0.0, -20.0),
+    ));
+
+    notes_stave_layout.append_child(layout::Node::new_solid_block(
+        notehead_layout.with_offset(0.0, -5.0),
+    ));
+
+    notes_stave_layout.append_child(layout::Node::new_solid_block(
+        notehead_layout.with_offset(0.0, 15.0),
+    ));
+
+    notes_stave_layout.append_child(layout::Node::new_solid_block(
+        notehead_layout
+            .with_offset(0.0, 15.0)
+            .with_margin(0.0, 20.0, 0.0, 10.0),
+    ));
+
+    notes_stave_layout.append_child(layout::Node::new_solid_block(
+        notehead_layout
+            .with_offset(0.0, 10.0)
+            .with_margin(0.0, 20.0, 0.0, 15.0),
+    ));
+
+    notes_stave_layout.append_child(layout::Node::SolidBlock(
+        barline_layout.with_offset(0.0, -20.0),
+    ));
+
+    notes_stave_layout.append_child(layout::Node::new_solid_block(
+        notehead_layout.with_offset(0.0, 5.0),
+    ));
+
+    notes_stave_layout.append_child(layout::Node::new_solid_block(
+        notehead_layout.with_offset(0.0, 5.0),
+    ));
+
+    notes_stave_layout.append_child(layout::Node::new_solid_block(
+        notehead_layout.with_offset(0.0, 10.0),
+    ));
+
+    notes_stave_layout.append_child(layout::Node::new_solid_block(
+        notehead_layout.with_offset(0.0, 5.0),
+    ));
+
+    notes_stave_layout.append_child(layout::Node::SolidBlock(
+        barline_layout.with_offset(0.0, -20.0),
+    ));
+
+    notes_stave_layout.append_child(layout::Node::new_block(
+        notehead_layout
+            .with_offset(0.0, 0.0)
+            .with_margin(0.0, 10.0, 0.0, 10.0),
+    ));
+
+    notes_stave_layout.append_child(layout::Node::new_block(
+        barline_layout.with_offset(0.0, -20.0),
+    ));
+
+    notes_stave_layout.append_child(layout::Node::new_block(
+        barline_layout
+            .with_offset(0.0, -20.0)
+            .with_margin(0.0, 0.0, 0.0, 5.0),
+    ));
+
+    let stave_again = notes_stave_layout.clone();
+    let stave_again_again = notes_stave_layout.clone();
+
+    ttb.append_child(notes_stave_layout);
+    ttb.append_child(stave_again);
+    ttb.append_child(stave_again_again);
+
     ttb.append_child(layout::Node::PlaceholderFrame(
         layout::LayoutSpec::none()
             .with_margin(20.0, 0.0, 0.0, 0.0)
@@ -723,6 +888,202 @@ fn demo_1() {
     ttb.append_child(footnote);
 
     page.set_root(ttb);
+
+    // Write normally.
+    eprintln!("Write normal...");
+    let mut string_buffer = String::new();
+    let config = layout::Config {
+        draw_bounding_box: false,
+    };
+    page.write(&config, &mut string_buffer);
+    let mut f = File::create("demo.svg").expect("Unable to create file");
+    f.write_all(string_buffer.as_bytes())
+        .expect("Unable to write data");
+
+    // And write with bounding boxes for debugging.
+    eprintln!("Write debug...");
+    let mut string_buffer = String::new();
+
+    let config = layout::Config {
+        draw_bounding_box: true,
+    };
+    page.write(&config, &mut string_buffer);
+
+    let mut f = File::create("demo_debug.svg").expect("Unable to create file");
+    f.write_all(string_buffer.as_bytes())
+        .expect("Unable to write data");
+}
+
+fn demo_2() {
+    let mut page = layout::Page::new(layout::Margin::new_uniform(20.0));
+
+    let mut notes_stave_layout = layout::Node::new_ltr(
+        layout::LayoutSpec::none()
+            .with_margin(20.0, 20.0, 20.0, 20.0)
+            .with_dimensions(1000.0, 0.0),
+    );
+
+    let notehead_layout = layout::LayoutSpec::none()
+        .with_dimensions(20.0, 10.0)
+        .with_margin(0.0, 10.0, 0.0, 10.0);
+
+    let barline_layout = layout::LayoutSpec::none().with_dimensions(1.0, 40.0);
+
+    notes_stave_layout.append_child(layout::Node::SolidBlock(
+        barline_layout.with_offset(0.0, -20.0),
+    ));
+
+    notes_stave_layout.append_child(layout::Node::new_solid_block(
+        notehead_layout.with_offset(0.0, -5.0),
+    ));
+
+    notes_stave_layout.append_child(layout::Node::new_solid_block(
+        notehead_layout.with_offset(0.0, 15.0),
+    ));
+
+    notes_stave_layout.append_child(layout::Node::new_block(
+        notehead_layout
+            .with_offset(0.0, 15.0)
+            .with_margin(0.0, 20.0, 0.0, 10.0),
+    ));
+
+    notes_stave_layout.append_child(layout::Node::SolidBlock(
+        barline_layout.with_offset(0.0, -20.0),
+    ));
+
+    notes_stave_layout.append_child(layout::Node::new_solid_block(
+        notehead_layout.with_offset(0.0, -5.0),
+    ));
+
+    notes_stave_layout.append_child(layout::Node::new_solid_block(
+        notehead_layout.with_offset(0.0, 15.0),
+    ));
+
+    notes_stave_layout.append_child(layout::Node::new_solid_block(
+        notehead_layout
+            .with_offset(0.0, 15.0)
+            .with_margin(0.0, 20.0, 0.0, 10.0),
+    ));
+
+    notes_stave_layout.append_child(layout::Node::new_solid_block(
+        notehead_layout
+            .with_offset(0.0, 10.0)
+            .with_margin(0.0, 20.0, 0.0, 15.0),
+    ));
+
+    notes_stave_layout.append_child(layout::Node::SolidBlock(
+        barline_layout.with_offset(0.0, -20.0),
+    ));
+
+    notes_stave_layout.append_child(layout::Node::new_solid_block(
+        notehead_layout.with_offset(0.0, 5.0),
+    ));
+
+    notes_stave_layout.append_child(layout::Node::new_solid_block(
+        notehead_layout.with_offset(0.0, 5.0),
+    ));
+
+    notes_stave_layout.append_child(layout::Node::new_solid_block(
+        notehead_layout.with_offset(0.0, 10.0),
+    ));
+
+    notes_stave_layout.append_child(layout::Node::new_solid_block(
+        notehead_layout.with_offset(0.0, 5.0),
+    ));
+
+    notes_stave_layout.append_child(layout::Node::SolidBlock(
+        barline_layout.with_offset(0.0, -20.0),
+    ));
+
+    notes_stave_layout.append_child(layout::Node::new_block(
+        notehead_layout
+            .with_offset(0.0, 0.0)
+            .with_margin(0.0, 10.0, 0.0, 10.0),
+    ));
+
+    notes_stave_layout.append_child(layout::Node::new_block(
+        barline_layout.with_offset(0.0, -20.0),
+    ));
+
+    notes_stave_layout.append_child(layout::Node::new_solid_block(
+        notehead_layout.with_offset(0.0, -5.0),
+    ));
+
+    notes_stave_layout.append_child(layout::Node::new_solid_block(
+        notehead_layout.with_offset(0.0, 15.0),
+    ));
+
+    notes_stave_layout.append_child(layout::Node::new_block(
+        notehead_layout
+            .with_offset(0.0, 15.0)
+            .with_margin(0.0, 20.0, 0.0, 10.0),
+    ));
+
+    notes_stave_layout.append_child(layout::Node::SolidBlock(
+        barline_layout.with_offset(0.0, -20.0),
+    ));
+
+    notes_stave_layout.append_child(layout::Node::new_solid_block(
+        notehead_layout.with_offset(0.0, -5.0),
+    ));
+
+    notes_stave_layout.append_child(layout::Node::new_solid_block(
+        notehead_layout.with_offset(0.0, 15.0),
+    ));
+
+    notes_stave_layout.append_child(layout::Node::new_solid_block(
+        notehead_layout
+            .with_offset(0.0, 15.0)
+            .with_margin(0.0, 20.0, 0.0, 10.0),
+    ));
+
+    notes_stave_layout.append_child(layout::Node::new_solid_block(
+        notehead_layout
+            .with_offset(0.0, 10.0)
+            .with_margin(0.0, 20.0, 0.0, 15.0),
+    ));
+
+    notes_stave_layout.append_child(layout::Node::SolidBlock(
+        barline_layout.with_offset(0.0, -20.0),
+    ));
+
+    notes_stave_layout.append_child(layout::Node::new_solid_block(
+        notehead_layout.with_offset(0.0, 5.0),
+    ));
+
+    notes_stave_layout.append_child(layout::Node::new_solid_block(
+        notehead_layout.with_offset(0.0, 5.0),
+    ));
+
+    notes_stave_layout.append_child(layout::Node::new_solid_block(
+        notehead_layout.with_offset(0.0, 10.0),
+    ));
+
+    notes_stave_layout.append_child(layout::Node::new_solid_block(
+        notehead_layout.with_offset(0.0, 5.0),
+    ));
+
+    notes_stave_layout.append_child(layout::Node::SolidBlock(
+        barline_layout.with_offset(0.0, -20.0),
+    ));
+
+    notes_stave_layout.append_child(layout::Node::new_block(
+        notehead_layout
+            .with_offset(0.0, 0.0)
+            .with_margin(0.0, 10.0, 0.0, 10.0),
+    ));
+
+    notes_stave_layout.append_child(layout::Node::new_block(
+        barline_layout.with_offset(0.0, -20.0),
+    ));
+
+    notes_stave_layout.append_child(layout::Node::new_block(
+        barline_layout
+            .with_offset(0.0, -20.0)
+            .with_margin(0.0, 0.0, 0.0, 5.0),
+    ));
+
+    page.set_root(notes_stave_layout);
 
     // Write normally.
     eprintln!("Write normal...");

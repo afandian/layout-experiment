@@ -102,6 +102,13 @@ impl TextSpec {
 pub struct LayoutSpec {
     pub dimensions: Dimensions,
     pub margin: Margin,
+    /// Offset has different behaviour depending on the container.
+    /// In LTR and LTRJustify:
+    /// - x-offset skews the node left or right from its place without affecting anything else
+    /// - y-offset moves the node up or down. It can be negative, in which case the container
+    /// increases its height to accommodate all nodes, including margin. This means that a vertical 
+    /// origin of zero can be used for the centre line. This is very handy for plotting on a stave, 
+    /// middle line is zero, and letting ledger-lines be automatically accommodated.
     pub offset: Point,
 }
 
@@ -136,6 +143,11 @@ impl LayoutSpec {
     }
 }
 
+/// A node in the tree.
+/// Polymorphism represented as an enum rather than a traits, as that
+/// would require a messy proliferation of boxed trait objects and lifetimes.
+/// This does constrain the extensibility, but this is intended to be embedded directly in the
+/// music typsetting code.
 #[derive(Debug, Clone)]
 pub enum Node {
     Blank(LayoutSpec),
@@ -155,76 +167,24 @@ pub enum Node {
     Text(LayoutSpec, TextSpec, String),
 }
 
-/// A node in the tree.
-/// Polymorphism represented as an enum rather than a traits, as that
-/// would require a messy proliferation of boxed trait objects.
+/// Given a collection of nodes, find the numerically lowest and highest
+/// points that a node touches, including its margin and offset.
+fn get_y_bounds(nodes: &Vec<Node>) -> (f32, f32) {
+    let lower = nodes
+        .iter()
+        .map(|x| x.get_offset().1 - x.get_margin().n)
+        .fold(0.0, f32::min);
+    let upper = nodes
+        .iter()
+        .map(|x| x.get_offset().1 + x.get_outer_dimensions().1)
+        .fold(0.0, f32::max);
+
+    (lower, upper)
+}
+
+// Node constructors
 impl Node {
-    // Get intrinsic dimensions of this Node (i.e. exclusing margin).
-    // These are sometimes derived dynamically, so different from layout.dimensions
-    fn get_dimensions(&self) -> Dimensions {
-        match self {
-            &Node::Blank(layout)
-            | &Node::PlaceholderFrame(layout)
-            | &Node::Block(layout)
-            | &Node::SolidBlock(layout) => layout.dimensions,
-
-            &Node::LTR(ref layout, ref items) => {
-                // In left-to-right, widths add up. Heights take max.
-                let width = items.iter().map(|x| x.get_outer_dimensions().0).sum();
-                let height = items
-                    .iter()
-                    .map(|x| x.get_outer_dimensions().1)
-                    .fold(0.0, f32::max);
-
-                Dimensions(width, height)
-            }
-
-            &Node::TTB(ref layout, ref items) => {
-                // In top-to-bottom, heights add up. Widths take max.
-                let height = items.iter().map(|x| x.get_outer_dimensions().1).sum();
-                let width = items
-                    .iter()
-                    .map(|x| x.get_outer_dimensions().0)
-                    .fold(0.0, f32::max);
-
-                Dimensions(width, height)
-            }
-
-            &Node::LTRJustify(ref layout, ref items) => {
-                // Width is constant. Heights take max.
-                let height = items
-                    .iter()
-                    .map(|x| x.get_outer_dimensions().1)
-                    .fold(0.0, f32::max);
-
-                Dimensions(layout.dimensions.0, height)
-            }
-
-            &Node::Text(_, ref text_spec, ref text) => {
-                // For now, derive width from a heuristic. Hopefully this will work out, on average.
-                Dimensions(
-                    text_spec.size * TEXT_CHAR_RATIO * text.len() as f32,
-                    text_spec.size,
-                )
-            }
-        }
-    }
-
-    /// Get the margin, zero margin if there isn't one.
-    fn get_margin(&self) -> Margin {
-        match self {
-            &Node::Blank(layout)
-            | &Node::Block(layout)
-            | &Node::SolidBlock(layout)
-            | &Node::PlaceholderFrame(layout)
-            | &Node::LTR(layout, _)
-            | &Node::TTB(layout, _)
-            | &Node::LTRJustify(layout, _)
-            | &Node::Text(layout, _, _) => layout.margin,
-        }
-    }
-
-    /// Get dimensions including margin.
+    /// Get dimensions including margin. Ignore offset.
     fn get_outer_dimensions(&self) -> Dimensions {
         self.get_dimensions().plus_margin(self.get_margin())
     }
@@ -245,6 +205,94 @@ impl Node {
         Node::Text(layout, text_spec, text)
     }
 
+    pub fn new_solid_block(layout: LayoutSpec) -> Node {
+        Node::SolidBlock(layout)
+    }
+
+    pub fn new_block(layout: LayoutSpec) -> Node {
+        Node::Block(layout)
+    }
+}
+
+// Accessors
+impl Node {
+    // Get intrinsic dimensions of this Node (i.e. exclusing margin).
+    // These are sometimes derived dynamically, so different from layout.dimensions
+    fn get_dimensions(&self) -> Dimensions {
+        match self {
+            &Node::Blank(layout)
+            | &Node::PlaceholderFrame(layout)
+            | &Node::Block(layout)
+            | &Node::SolidBlock(layout) => layout.dimensions,
+
+            &Node::LTR(ref layout, ref items) => {
+                // Accommodate the full y-range of items' offsets.
+                // We'll need to fit them all in.
+                let (lower, upper) = get_y_bounds(items);
+                let height = upper - lower;
+
+                // In left-to-right, widths add up. Heights take max.
+                let width = items.iter().map(|x| x.get_outer_dimensions().0).sum();
+
+                Dimensions(width, height)
+            }
+
+            &Node::TTB(ref layout, ref items) => {
+                // In top-to-bottom, heights add up. Widths take max.
+                let height = items.iter().map(|x| x.get_outer_dimensions().1).sum();
+                let width = items
+                    .iter()
+                    .map(|x| x.get_outer_dimensions().0)
+                    .fold(0.0, f32::max);
+
+                Dimensions(width, height)
+            }
+
+            &Node::LTRJustify(ref layout, ref items) => {
+                // Accommodate the full y-range of items' offsets.
+                // We'll need to fit them all in.
+                let (lower, upper) = get_y_bounds(items);
+                let height = upper - lower;
+
+                Dimensions(layout.dimensions.0, height)
+            }
+
+            &Node::Text(_, ref text_spec, ref text) => {
+                // For now, derive width from a heuristic. Hopefully this will work out, on average.
+                Dimensions(
+                    text_spec.size * TEXT_CHAR_RATIO * text.len() as f32,
+                    text_spec.size,
+                )
+            }
+        }
+    }
+
+    // Get the layout spec of this node, or a blank one.
+    fn get_layout(&self) -> LayoutSpec {
+        match self {
+            &Node::Blank(layout)
+            | &Node::Block(layout)
+            | &Node::SolidBlock(layout)
+            | &Node::PlaceholderFrame(layout)
+            | &Node::LTR(layout, _)
+            | &Node::TTB(layout, _)
+            | &Node::LTRJustify(layout, _)
+            | &Node::Text(layout, _, _) => layout,
+        }
+    }
+
+    /// Get the margin, zero margin if there isn't one.
+    fn get_margin(&self) -> Margin {
+        self.get_layout().margin
+    }
+
+    /// Get the margin, zero margin if there isn't one.
+    fn get_offset(&self) -> Point {
+        self.get_layout().offset
+    }
+}
+
+impl Node {
     // Push a child.
     // If this is the wrong kind of node, just ignore.
     // TODO not perfect!
@@ -315,13 +363,30 @@ impl Node {
                 let mut x = origin.0;
                 let mut y = origin.1;
 
+                // Offset all children's potentially negative offsets.
+                let (lower, _) = get_y_bounds(children);
+                y -= lower;
+
                 for ref node in children.iter() {
                     node.draw(
                         config,
                         buf,
-                        Point(x + node.get_margin().w, y + node.get_margin().n),
+                        Point(
+                            x + node.get_margin().w + node.get_offset().0,
+                            y + node.get_margin().n + node.get_offset().1,
+                        ),
                     );
                     x += node.get_outer_dimensions().0;
+                }
+
+                if config.draw_bounding_box {
+                    // y-origin line
+                    write!(
+                        buf,
+                        "<line x1='{}' y1='{}' x2='{}' y2='{}' \
+                         class='debug debug-node' stroke-dashoffset='0' stroke-dasharray='4,4' style='stroke:red;stroke-style:dashed;stroke-width:1'   />\n",
+                        origin.0, y, origin.0 + dimensions.0, y+1.0
+                    ).unwrap();
                 }
             }
 
@@ -343,6 +408,10 @@ impl Node {
                 let mut x = origin.0;
                 let mut y = origin.1;
 
+                // Offset all children's potentially negative offsets.
+                let (lower, _) = get_y_bounds(children);
+                y -= lower;
+
                 if children.len() == 0 {
                     return;
                 }
@@ -353,7 +422,11 @@ impl Node {
                     child.draw(
                         config,
                         buf,
-                        Point(x + child.get_margin().w, y + child.get_margin().n),
+                        Point(
+                            x + child.get_margin().w + child.get_offset().0,
+                            y + child.get_margin().n + child.get_offset().1,
+                        )
+                        // Point(x + child.get_margin().w, y + child.get_margin().n),
                     );
                     return;
                 }
@@ -368,7 +441,11 @@ impl Node {
                 first.draw(
                     config,
                     buf,
-                    Point(x + first.get_margin().w, y + first.get_margin().n),
+                    // Point(x + first.get_margin().w, y + first.get_margin().n),
+                    Point(
+                        x + first.get_margin().w + first.get_offset().0,
+                        y + first.get_margin().n + first.get_offset().1,
+                    ),
                 );
 
                 // And the middle ones should be distributed in the remaining width.
@@ -400,18 +477,33 @@ impl Node {
                     node.draw(
                         config,
                         buf,
-                        Point(x + node.get_margin().w, y + node.get_margin().n),
+                        Point(
+                            x + node.get_margin().w + node.get_offset().0,
+                            y + node.get_margin().n + node.get_offset().1,
+                        ),
                     );
                     x += node.get_outer_dimensions().0;
                 }
 
                 x += space_between_items;
-                // last.draw(config, buf, Point(width - last.get_dimensions().0, y));
                 last.draw(
                     config,
                     buf,
-                    Point(x + last.get_margin().w, y + last.get_margin().n),
+                    Point(
+                        x + last.get_margin().w + last.get_offset().0,
+                        y + last.get_margin().n + last.get_offset().1,
+                    ),
                 );
+
+                if config.draw_bounding_box {
+                    // y-origin line.
+                    write!(
+                        buf,
+                        "<line x1='{}' y1='{}' x2='{}' y2='{}' \
+                         class='debug debug-node' stroke-dashoffset='0' stroke-dasharray='4,4' style='stroke:red;stroke-style:dashed;stroke-width:1'   />\n",
+                        origin.0, y, origin.0 + dimensions.0, y+1.0
+                    ).unwrap();
+                }
             }
 
             &Node::Text(_, text_spec, ref text) => {
@@ -442,11 +534,20 @@ impl Node {
         }
 
         if config.draw_bounding_box {
+            // Bounding box of content.
             write!(
                 buf,
                 "<rect x='{}' y='{}' width='{}' height='{}' \
-                 class='debug debug-node' style='fill:none;stroke:blue;stroke-width:1'   />\n",
+                 class='debug debug-node' stroke-dashoffset='0' stroke-dasharray='4,4' style='fill:none;stroke:blue;stroke-style:dashed;stroke-width:1'   />\n",
                 origin.0, origin.1, dimensions.0, dimensions.1
+            ).unwrap();
+
+            // Bounding box including outer margin.
+            write!(
+                buf,
+                "<rect x='{}' y='{}' width='{}' height='{}' \
+                 class='debug debug-node' stroke-dashoffset='4' stroke-dasharray='4,4' style='fill:none;stroke:green;stroke-width:1'   />\n",
+                origin.0 - self.get_margin().w, origin.1 - self.get_margin().n, dimensions.0 + self.get_margin().w + self.get_margin().e, dimensions.1 + self.get_margin().n + self.get_margin().s
             ).unwrap();
         }
     }
