@@ -2,6 +2,8 @@
 
 use std::fmt::Write;
 
+use std;
+
 // Average character width as multiple of font height px.
 const TEXT_CHAR_RATIO: f32 = 0.5;
 
@@ -31,8 +33,16 @@ impl Dimensions {
 
 #[derive(Clone, Copy, Debug)]
 pub struct Bounds {
-    origin: Point,
-    dimensions: Dimensions,
+    pub top_left: Point,
+    pub dimensions: Dimensions,
+}
+
+/// Bounds, but the origin is offset.
+#[derive(Clone, Copy, Debug)]
+pub struct BoundsWithOffset {
+    pub top_left: Point,
+    pub dimensions: Dimensions,
+    pub origin: Point,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -106,8 +116,8 @@ pub struct LayoutSpec {
     /// In LTR and LTRJustify:
     /// - x-offset skews the node left or right from its place without affecting anything else
     /// - y-offset moves the node up or down. It can be negative, in which case the container
-    /// increases its height to accommodate all nodes, including margin. This means that a vertical 
-    /// origin of zero can be used for the centre line. This is very handy for plotting on a stave, 
+    /// increases its height to accommodate all nodes, including margin. This means that a vertical
+    /// origin of zero can be used for the centre line. This is very handy for plotting on a stave,
     /// middle line is zero, and letting ledger-lines be automatically accommodated.
     pub offset: Point,
 }
@@ -143,6 +153,30 @@ impl LayoutSpec {
     }
 }
 
+fn no_callback(buf: &mut String, bounds: BoundsWithOffset) -> () {}
+
+#[derive(Clone, Copy)]
+pub struct Callbacks {
+    /// Draw the background. The origin can be offset, e.g. LTRJustify
+    pub draw_background: fn(buf: &mut String, bounds: BoundsWithOffset) -> (),
+}
+
+impl Callbacks {
+    pub fn none() -> Callbacks {
+        Callbacks {
+            draw_background: no_callback,
+        }
+    }
+}
+
+impl std::fmt::Debug for Callbacks {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
+        // Nothing to do.
+        // There's no useful info to be had here.
+        Result::Ok(())
+    }
+}
+
 /// A node in the tree.
 /// Polymorphism represented as an enum rather than a traits, as that
 /// would require a messy proliferation of boxed trait objects and lifetimes.
@@ -150,21 +184,21 @@ impl LayoutSpec {
 /// music typsetting code.
 #[derive(Debug, Clone)]
 pub enum Node {
-    Blank(LayoutSpec),
-    Block(LayoutSpec),
-    SolidBlock(LayoutSpec),
-    PlaceholderFrame(LayoutSpec),
+    Blank(LayoutSpec, Callbacks),
+    Block(LayoutSpec, Callbacks),
+    SolidBlock(LayoutSpec, Callbacks),
+    PlaceholderFrame(LayoutSpec, Callbacks),
     /// Left-to-right layout.
     /// Takes dimensions from children.
-    LTR(LayoutSpec, Vec<Node>),
+    LTR(LayoutSpec, Callbacks, Vec<Node>),
     /// Top-to-bottom layout.
     /// Takes dimensions from children.
-    TTB(LayoutSpec, Vec<Node>),
+    TTB(LayoutSpec, Callbacks, Vec<Node>),
     /// Left-to-right layout, justified to supplied width.
     /// Height is derived from content (value in LayoutSpec is ignored).
-    LTRJustify(LayoutSpec, Vec<Node>),
+    LTRJustify(LayoutSpec, Callbacks, Vec<Node>),
     /// Text of given font size.
-    Text(LayoutSpec, TextSpec, String),
+    Text(LayoutSpec, Callbacks, TextSpec, String),
 }
 
 /// Given a collection of nodes, find the numerically lowest and highest
@@ -189,28 +223,41 @@ impl Node {
         self.get_dimensions().plus_margin(self.get_margin())
     }
 
-    pub fn new_ltr(layout: LayoutSpec) -> Node {
-        Node::LTR(layout, vec![])
+    pub fn new_placeholder_frame(layout: LayoutSpec, callbacks: Callbacks) -> Node {
+        Node::PlaceholderFrame(layout, callbacks)
     }
 
-    pub fn new_ltr_justify(layout: LayoutSpec) -> Node {
-        Node::LTRJustify(layout, vec![])
+    pub fn new_ltr(layout: LayoutSpec, callbacks: Callbacks) -> Node {
+        Node::LTR(layout, callbacks, vec![])
     }
 
-    pub fn new_ttb(layout: LayoutSpec) -> Node {
-        Node::TTB(layout, vec![])
+    pub fn new_blank(layout: LayoutSpec, callbacks: Callbacks) -> Node {
+        Node::Blank(layout, callbacks)
     }
 
-    pub fn new_text(layout: LayoutSpec, text_spec: TextSpec, text: String) -> Node {
-        Node::Text(layout, text_spec, text)
+    pub fn new_ltr_justify(layout: LayoutSpec, callbacks: Callbacks) -> Node {
+        Node::LTRJustify(layout, callbacks, vec![])
     }
 
-    pub fn new_solid_block(layout: LayoutSpec) -> Node {
-        Node::SolidBlock(layout)
+    pub fn new_ttb(layout: LayoutSpec, callbacks: Callbacks) -> Node {
+        Node::TTB(layout, callbacks, vec![])
     }
 
-    pub fn new_block(layout: LayoutSpec) -> Node {
-        Node::Block(layout)
+    pub fn new_text(
+        layout: LayoutSpec,
+        callbacks: Callbacks,
+        text_spec: TextSpec,
+        text: String,
+    ) -> Node {
+        Node::Text(layout, callbacks, text_spec, text)
+    }
+
+    pub fn new_solid_block(layout: LayoutSpec, callbacks: Callbacks) -> Node {
+        Node::SolidBlock(layout, callbacks)
+    }
+
+    pub fn new_block(layout: LayoutSpec, callbacks: Callbacks) -> Node {
+        Node::Block(layout, callbacks)
     }
 }
 
@@ -220,12 +267,12 @@ impl Node {
     // These are sometimes derived dynamically, so different from layout.dimensions
     fn get_dimensions(&self) -> Dimensions {
         match self {
-            &Node::Blank(layout)
-            | &Node::PlaceholderFrame(layout)
-            | &Node::Block(layout)
-            | &Node::SolidBlock(layout) => layout.dimensions,
+            &Node::Blank(layout, _)
+            | &Node::PlaceholderFrame(layout, _)
+            | &Node::Block(layout, _)
+            | &Node::SolidBlock(layout, _) => layout.dimensions,
 
-            &Node::LTR(ref layout, ref items) => {
+            &Node::LTR(ref layout, _, ref items) => {
                 // Accommodate the full y-range of items' offsets.
                 // We'll need to fit them all in.
                 let (lower, upper) = get_y_bounds(items);
@@ -237,7 +284,7 @@ impl Node {
                 Dimensions(width, height)
             }
 
-            &Node::TTB(ref layout, ref items) => {
+            &Node::TTB(ref layout, _, ref items) => {
                 // In top-to-bottom, heights add up. Widths take max.
                 let height = items.iter().map(|x| x.get_outer_dimensions().1).sum();
                 let width = items
@@ -248,7 +295,7 @@ impl Node {
                 Dimensions(width, height)
             }
 
-            &Node::LTRJustify(ref layout, ref items) => {
+            &Node::LTRJustify(ref layout, _, ref items) => {
                 // Accommodate the full y-range of items' offsets.
                 // We'll need to fit them all in.
                 let (lower, upper) = get_y_bounds(items);
@@ -257,7 +304,7 @@ impl Node {
                 Dimensions(layout.dimensions.0, height)
             }
 
-            &Node::Text(_, ref text_spec, ref text) => {
+            &Node::Text(_, _, ref text_spec, ref text) => {
                 // For now, derive width from a heuristic. Hopefully this will work out, on average.
                 Dimensions(
                     text_spec.size * TEXT_CHAR_RATIO * text.len() as f32,
@@ -270,14 +317,14 @@ impl Node {
     // Get the layout spec of this node, or a blank one.
     fn get_layout(&self) -> LayoutSpec {
         match self {
-            &Node::Blank(layout)
-            | &Node::Block(layout)
-            | &Node::SolidBlock(layout)
-            | &Node::PlaceholderFrame(layout)
-            | &Node::LTR(layout, _)
-            | &Node::TTB(layout, _)
-            | &Node::LTRJustify(layout, _)
-            | &Node::Text(layout, _, _) => layout,
+            &Node::Blank(layout, _)
+            | &Node::Block(layout, _)
+            | &Node::SolidBlock(layout, _)
+            | &Node::PlaceholderFrame(layout, _)
+            | &Node::LTR(layout, _, _)
+            | &Node::TTB(layout, _, _)
+            | &Node::LTRJustify(layout, _, _)
+            | &Node::Text(layout, _, _, _) => layout,
         }
     }
 
@@ -290,6 +337,19 @@ impl Node {
     fn get_offset(&self) -> Point {
         self.get_layout().offset
     }
+
+    fn get_callbacks(&self) -> Callbacks {
+        match self {
+            &Node::Blank(_, callbacks)
+            | &Node::Block(_, callbacks)
+            | &Node::SolidBlock(_, callbacks)
+            | &Node::PlaceholderFrame(_, callbacks)
+            | &Node::LTR(_, callbacks, _)
+            | &Node::TTB(_, callbacks, _)
+            | &Node::LTRJustify(_, callbacks, _)
+            | &Node::Text(_, callbacks, _, _) => callbacks,
+        }
+    }
 }
 
 impl Node {
@@ -298,9 +358,9 @@ impl Node {
     // TODO not perfect!
     pub fn append_child(&mut self, child: Node) {
         match self {
-            &mut Node::LTR(_, ref mut items)
-            | &mut Node::TTB(_, ref mut items)
-            | &mut Node::LTRJustify(_, ref mut items) => {
+            &mut Node::LTR(_, _, ref mut items)
+            | &mut Node::TTB(_, _, ref mut items)
+            | &mut Node::LTRJustify(_, _, ref mut items) => {
                 items.push(child);
             }
 
@@ -316,10 +376,13 @@ impl Node {
         // so we're working to the same interface as the parent laying this out.
         let dimensions = self.get_dimensions();
 
-        match self {
-            &Node::Blank(_) => (),
+        let callbacks = self.get_callbacks();
 
-            &Node::Block(_) => {
+        // The unmatched fields are handled in a uniform fashion by above self getters.
+        match self {
+            &Node::Blank(_, _) => (),
+
+            &Node::Block(_, _) => {
                 write!(
                     buf,
                     "<rect x='{}' y='{}' width='{}' height='{}' \
@@ -328,7 +391,7 @@ impl Node {
                 ).unwrap();
             }
 
-            &Node::SolidBlock(_) => {
+            &Node::SolidBlock(_, _) => {
                 write!(
                     buf,
                     "<rect x='{}' y='{}' width='{}' height='{}' \
@@ -337,7 +400,7 @@ impl Node {
                 ).unwrap();
             }
 
-            &Node::PlaceholderFrame(_) => {
+            &Node::PlaceholderFrame(_, _) => {
                 write!(
                     buf,
                     "<rect x='{}' y='{}' width='{}' height='{}' \
@@ -359,7 +422,7 @@ impl Node {
                 ).unwrap();
             }
 
-            &Node::LTR(_, ref children) => {
+            &Node::LTR(_, _, ref children) => {
                 let mut x = origin.0;
                 let mut y = origin.1;
 
@@ -390,7 +453,7 @@ impl Node {
                 }
             }
 
-            &Node::TTB(_, ref children) => {
+            &Node::TTB(_, _, ref children) => {
                 let mut x = origin.0;
                 let mut y = origin.1;
 
@@ -404,13 +467,23 @@ impl Node {
                 }
             }
 
-            &Node::LTRJustify(ref layout, ref children) => {
+            &Node::LTRJustify(ref layout, _, ref children) => {
                 let mut x = origin.0;
                 let mut y = origin.1;
 
                 // Offset all children's potentially negative offsets.
                 let (lower, _) = get_y_bounds(children);
                 y -= lower;
+
+                // Supply the bounding record and also the adjusted y-offseted origin.
+                (callbacks.draw_background)(
+                    buf,
+                    BoundsWithOffset {
+                        top_left: origin,
+                        origin: Point(x, y),
+                        dimensions,
+                    },
+                );
 
                 if children.len() == 0 {
                     return;
@@ -500,13 +573,13 @@ impl Node {
                     write!(
                         buf,
                         "<line x1='{}' y1='{}' x2='{}' y2='{}' \
-                         class='debug debug-node' stroke-dashoffset='0' stroke-dasharray='4,4' style='stroke:red;stroke-style:dashed;stroke-width:1'   />\n",
+                         class='debug debug-node' stroke-dashoffset='0' stroke-dasharray='4,4' style='stroke:red;stroke-style:dashed;stroke-width:1;fill:none'   />\n",
                         origin.0, y, origin.0 + dimensions.0, y+1.0
                     ).unwrap();
                 }
             }
 
-            &Node::Text(_, text_spec, ref text) => {
+            &Node::Text(_, _, text_spec, ref text) => {
                 // x means different things depending on anchor. Offset for correct behaviour.
                 let x = origin.0 + match text_spec.anchor_hint {
                     TextAnchor::Start => 0.0,
@@ -565,11 +638,14 @@ impl Page {
         Page {
             margin,
             // Start with nothing. An appropriate root note will get swapped in.
-            root: Node::Blank(LayoutSpec {
-                margin: Margin::none(),
-                dimensions: Dimensions::none(),
-                offset: Point(0.0, 0.0),
-            }),
+            root: Node::Blank(
+                LayoutSpec {
+                    margin: Margin::none(),
+                    dimensions: Dimensions::none(),
+                    offset: Point(0.0, 0.0),
+                },
+                Callbacks::none(),
+            ),
         }
     }
 
