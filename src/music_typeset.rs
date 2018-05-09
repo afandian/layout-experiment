@@ -129,14 +129,20 @@ pub fn render_stave(elems: &Vec<StaveEntity>) -> layout::Node {
         match elem {
             StaveEntity::Note(position, symbol) => match symbol {
                 NoteHeadSymbol::Empty => {
+                    // Upper edge of notehead.
+                    let notehead_y = -PLACE_SPACING * (*position as f32) - PLACE_SPACING;
+
                     notes_stave_layout.append_child(layout::Node::new_block(
-                        notehead_style.with_offset(0.0, PLACE_SPACING * (*position as f32) - PLACE_SPACING),
+                        notehead_style.with_offset(0.0, notehead_y),
                         layout::Callbacks::none(),
                     ));
                 }
                 NoteHeadSymbol::Filled => {
+                    // Upper edge of notehead.
+                    let notehead_y = -PLACE_SPACING * (*position as f32) - PLACE_SPACING;
+
                     notes_stave_layout.append_child(layout::Node::new_solid_block(
-                        notehead_style.with_offset(0.0, PLACE_SPACING * (*position as f32) - PLACE_SPACING),
+                        notehead_style.with_offset(0.0, notehead_y),
                         layout::Callbacks::none(),
                     ));
                 }
@@ -148,7 +154,7 @@ pub fn render_stave(elems: &Vec<StaveEntity>) -> layout::Node {
                         layout::Callbacks::none(),
                     ));
                 }
-                
+
                 // Hacky.
                 BarlineSymbol::Double => {
                     notes_stave_layout.append_child(layout::Node::new_block(

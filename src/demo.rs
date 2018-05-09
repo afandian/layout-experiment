@@ -11,9 +11,7 @@ pub fn demo_typeset() {
     };
 
     let mut chunks: Vec<music_typeset::Chunk> = vec![];
-    chunks.push(music_typeset::Chunk::Title(
-        "Bear Dance".to_string(),
-    ));
+    chunks.push(music_typeset::Chunk::Title("Bear Dance".to_string()));
 
     let mut stave: Vec<music_typeset::StaveEntity> = vec![];
     stave.push(music_typeset::StaveEntity::Note(
@@ -21,11 +19,11 @@ pub fn demo_typeset() {
         music_typeset::NoteHeadSymbol::Filled,
     ));
     stave.push(music_typeset::StaveEntity::Note(
-        4,
+        -4,
         music_typeset::NoteHeadSymbol::Filled,
     ));
     stave.push(music_typeset::StaveEntity::Note(
-        4,
+        -4,
         music_typeset::NoteHeadSymbol::Empty,
     ));
     stave.push(music_typeset::StaveEntity::Barline(
@@ -36,41 +34,41 @@ pub fn demo_typeset() {
         music_typeset::NoteHeadSymbol::Filled,
     ));
     stave.push(music_typeset::StaveEntity::Note(
-        4,
+        -4,
         music_typeset::NoteHeadSymbol::Filled,
     ));
     stave.push(music_typeset::StaveEntity::Note(
-        4,
+        -4,
         music_typeset::NoteHeadSymbol::Filled,
     ));
     stave.push(music_typeset::StaveEntity::Note(
-        3,
-        music_typeset::NoteHeadSymbol::Filled,
-    ));
-    stave.push(music_typeset::StaveEntity::Barline(
-        music_typeset::BarlineSymbol::Single,
-    ));
-    stave.push(music_typeset::StaveEntity::Note(
-        2,
-        music_typeset::NoteHeadSymbol::Filled,
-    ));
-    stave.push(music_typeset::StaveEntity::Note(
-        2,
-        music_typeset::NoteHeadSymbol::Filled,
-    ));
-    stave.push(music_typeset::StaveEntity::Note(
-        3,
-        music_typeset::NoteHeadSymbol::Filled,
-    ));
-    stave.push(music_typeset::StaveEntity::Note(
-        2,
+        -3,
         music_typeset::NoteHeadSymbol::Filled,
     ));
     stave.push(music_typeset::StaveEntity::Barline(
         music_typeset::BarlineSymbol::Single,
     ));
     stave.push(music_typeset::StaveEntity::Note(
-        1,
+        -2,
+        music_typeset::NoteHeadSymbol::Filled,
+    ));
+    stave.push(music_typeset::StaveEntity::Note(
+        -2,
+        music_typeset::NoteHeadSymbol::Filled,
+    ));
+    stave.push(music_typeset::StaveEntity::Note(
+        -3,
+        music_typeset::NoteHeadSymbol::Filled,
+    ));
+    stave.push(music_typeset::StaveEntity::Note(
+        -2,
+        music_typeset::NoteHeadSymbol::Filled,
+    ));
+    stave.push(music_typeset::StaveEntity::Barline(
+        music_typeset::BarlineSymbol::Single,
+    ));
+    stave.push(music_typeset::StaveEntity::Note(
+        -1,
         music_typeset::NoteHeadSymbol::Empty,
     ));
     stave.push(music_typeset::StaveEntity::Barline(
@@ -79,7 +77,7 @@ pub fn demo_typeset() {
     chunks.push(music_typeset::Chunk::Stave(stave));
 
     // Line 2
-        let mut stave: Vec<music_typeset::StaveEntity> = vec![];
+    let mut stave: Vec<music_typeset::StaveEntity> = vec![];
     stave.push(music_typeset::StaveEntity::Note(
         0,
         music_typeset::NoteHeadSymbol::Filled,
@@ -89,62 +87,60 @@ pub fn demo_typeset() {
         music_typeset::NoteHeadSymbol::Filled,
     ));
     stave.push(music_typeset::StaveEntity::Note(
-        1,
+        -1,
         music_typeset::NoteHeadSymbol::Filled,
     ));
     stave.push(music_typeset::StaveEntity::Note(
-        1,
+        -1,
         music_typeset::NoteHeadSymbol::Filled,
     ));
     stave.push(music_typeset::StaveEntity::Barline(
         music_typeset::BarlineSymbol::Single,
     ));
     stave.push(music_typeset::StaveEntity::Note(
-        2,
+        -2,
         music_typeset::NoteHeadSymbol::Filled,
     ));
     stave.push(music_typeset::StaveEntity::Note(
-        2,
+        -2,
         music_typeset::NoteHeadSymbol::Filled,
     ));
     stave.push(music_typeset::StaveEntity::Note(
-        3,
+        -3,
         music_typeset::NoteHeadSymbol::Empty,
     ));
     stave.push(music_typeset::StaveEntity::Barline(
         music_typeset::BarlineSymbol::Single,
     ));
-    
+
     stave.push(music_typeset::StaveEntity::Note(
-        4,
+        -4,
         music_typeset::NoteHeadSymbol::Filled,
     ));
     stave.push(music_typeset::StaveEntity::Note(
-        2,
+        -2,
         music_typeset::NoteHeadSymbol::Filled,
     ));
     stave.push(music_typeset::StaveEntity::Note(
-        3,
+        -3,
         music_typeset::NoteHeadSymbol::Filled,
     ));
     stave.push(music_typeset::StaveEntity::Note(
-        5,
+        -5,
         music_typeset::NoteHeadSymbol::Filled,
     ));
     stave.push(music_typeset::StaveEntity::Barline(
         music_typeset::BarlineSymbol::Single,
     ));
     stave.push(music_typeset::StaveEntity::Note(
-        4,
+        -4,
         music_typeset::NoteHeadSymbol::Empty,
     ));
     stave.push(music_typeset::StaveEntity::Barline(
         music_typeset::BarlineSymbol::Double,
     ));
 
-
     chunks.push(music_typeset::Chunk::Stave(stave));
-
 
     let page = music_typeset::typeset(&chunks);
 
