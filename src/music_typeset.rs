@@ -1,5 +1,4 @@
 use layout;
-use std::fmt::Write as _fw;
 
 /// Position on a stave relative to the centre line.
 type StavePosition = i16;
@@ -18,6 +17,8 @@ const LINES_EITHER_SIDE_MIDDLE: StavePosition = (NUM_LINES - 1) / 2;
 
 // Line to line.
 const STAVE_HEIGHT: f32 = (NUM_LINES - 1) as f32 * LINE_SPACING;
+
+const DOUBLE_BARLINE_SPACING: f32 = 4.0;
 
 pub enum Chunk {
     Title(String),
@@ -52,23 +53,60 @@ pub enum StaveEntity {
     // Rest(StavePosition),
 }
 
-/// Node background callback to draw a stave as the background to a Node.
-fn draw_stave(buf: &mut String, bounds: layout::BoundsWithOffset) -> () {
-    let mut line_y = bounds.origin.1 - (STAVE_HEIGHT / 2.0);
+/// Node background callback
+mod callbacks {
+    use layout;
+    use std::fmt::Write as _fw;
 
-    // We'll be given the origin and bounds, but it will be with relation to the middle line.
-    // Therefore offset everything up by half a stave.
+    /// Draw a stave as the background to a LTRJustify Node.
+    pub fn draw_stave(buf: &mut String, bounds: layout::BoundsWithOffset) -> () {
+        let mut line_y = bounds.origin.1 - (super::STAVE_HEIGHT / 2.0);
 
-    for line in 0..NUM_LINES {
+        // We'll be given the origin and bounds, but it will be with relation to the middle line.
+        // Therefore offset everything up by half a stave.
+
+        for line in 0..super::NUM_LINES {
+            write!(
+                buf,
+                "<line x1='{}' y1='{}' x2='{}' y2='{}' stroke-width='1.5' stroke='black' />\n",
+                bounds.origin.0,
+                line_y,
+                bounds.origin.0 + bounds.dimensions.0,
+                line_y
+            ).unwrap();
+            line_y += super::LINE_SPACING;
+        }
+    }
+
+    pub fn draw_barline(buf: &mut String, bounds: layout::BoundsWithOffset) -> () {
         write!(
             buf,
-            "<line x1='{}' y1='{}' x2='{}' y2='{}' stroke-width='1' stroke='black' />\n",
+            "<line x1='{}' y1='{}' x2='{}' y2='{}' stroke-width='1.5' stroke='black' />\n",
             bounds.origin.0,
-            line_y,
-            bounds.origin.0 + bounds.dimensions.0,
-            line_y
+            bounds.origin.1,
+            bounds.origin.0,
+            bounds.origin.1 + bounds.dimensions.1,
         ).unwrap();
-        line_y += LINE_SPACING;
+    }
+
+    pub fn draw_double_barline(buf: &mut String, bounds: layout::BoundsWithOffset) -> () {
+        write!(
+            buf,
+            "<line x1='{}' y1='{}' x2='{}' y2='{}' stroke-width='1.5' stroke='black' />\n",
+            bounds.origin.0,
+            bounds.origin.1,
+            bounds.origin.0,
+            bounds.origin.1 + bounds.dimensions.1,
+        ).unwrap();
+
+        write!(
+            buf,
+            "<line x1='{}' y1='{}' x2='{}' y2='{}' stroke-width='1.5' stroke='black' />\n",
+            bounds.origin.0 + super::DOUBLE_BARLINE_SPACING,
+            bounds.origin.1,
+            bounds.origin.0 + super::DOUBLE_BARLINE_SPACING,
+            bounds.origin.1 + bounds.dimensions.1,
+        ).unwrap();
     }
 }
 
@@ -107,7 +145,15 @@ pub fn render_title(title: &String) -> layout::Node {
 
 pub fn render_stave(elems: &Vec<StaveEntity>) -> layout::Node {
     let stave_callback = layout::Callbacks {
-        draw_background: draw_stave,
+        draw_background: callbacks::draw_stave,
+    };
+
+    let barline_callback = layout::Callbacks {
+        draw_background: callbacks::draw_barline,
+    };
+
+    let double_barline_callback = layout::Callbacks {
+        draw_background: callbacks::draw_double_barline,
     };
 
     let notehead_style = layout::LayoutSpec::none()
@@ -116,6 +162,10 @@ pub fn render_stave(elems: &Vec<StaveEntity>) -> layout::Node {
 
     let barline_style = layout::LayoutSpec::none()
         .with_dimensions(1.0, STAVE_HEIGHT)
+        .with_offset(0.0, -STAVE_HEIGHT / 2.0);
+
+    let double_barline_style = layout::LayoutSpec::none()
+        .with_dimensions(DOUBLE_BARLINE_SPACING, STAVE_HEIGHT)
         .with_offset(0.0, -STAVE_HEIGHT / 2.0);
 
     let mut notes_stave_layout = layout::Node::new_ltr_justify(
@@ -149,22 +199,14 @@ pub fn render_stave(elems: &Vec<StaveEntity>) -> layout::Node {
             },
             StaveEntity::Barline(symbol) => match symbol {
                 BarlineSymbol::Single => {
-                    notes_stave_layout.append_child(layout::Node::new_block(
-                        barline_style,
-                        layout::Callbacks::none(),
-                    ));
+                    notes_stave_layout
+                        .append_child(layout::Node::new_blank(barline_style, barline_callback));
                 }
 
-                // Hacky.
                 BarlineSymbol::Double => {
-                    notes_stave_layout.append_child(layout::Node::new_block(
-                        barline_style.with_margin(0.0, 10.0, 0.0, 0.0),
-                        layout::Callbacks::none(),
-                    ));
-
-                    notes_stave_layout.append_child(layout::Node::new_block(
-                        barline_style.with_margin(0.0, 0.0, 0.0, -10.0),
-                        layout::Callbacks::none(),
+                    notes_stave_layout.append_child(layout::Node::new_blank(
+                        double_barline_style,
+                        double_barline_callback,
                     ));
                 }
             },

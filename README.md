@@ -13,21 +13,33 @@ Experimental ideas for a page layout engine, written in Rust. Build page structu
 
 # Progress
 
+## 2018-05-09
+Callbacks on blank `Node`s for barline and double barline. Drawing these is now handled by callbacks in the `music_typeset` namespace, dynamically hooked into the generic `layout` namespace.
+
+<img src="progress/2018-05-09.svg" width="50%">
+
 ## 2018-05-08
+
+Start of a `music_typeset` domain model which renders to generic `layout` model.
+
 <img src="progress/2018-05-08.svg" width="50%">
 
 ## 2018-05-05
-<img src="progress/2018-05-05-b.svg" width="50%">
 
+Left-to-right-justified Node is able to accept negative offsets of its children and expand to accommodate. 
 
-## 2018-05-05
 <img src="progress/2018-05-05.svg" width="50%">
 
 
 ## 2018-05-04
+Variety of Node types in the `layout` domain model, plus margins.
+
 <img src="progress/2018-05-04.svg" width="50%">
 
 ## 2018-05-02
+
+Start of a box model with justification.
+
 <img src="progress/2018-05-02.svg" width="50%">
 
 # TODO

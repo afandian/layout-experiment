@@ -380,7 +380,16 @@ impl Node {
 
         // The unmatched fields are handled in a uniform fashion by above self getters.
         match self {
-            &Node::Blank(_, _) => (),
+            &Node::Blank(_, _) => {
+                (callbacks.draw_background)(
+                    buf,
+                    BoundsWithOffset {
+                        top_left: origin,
+                        origin: origin,
+                        dimensions,
+                    },
+                );
+            }
 
             &Node::Block(_, _) => {
                 write!(
